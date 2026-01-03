@@ -48,14 +48,23 @@ discovery.docker "linux" {
 
 // Relabel Docker metadata
 discovery.relabel "logs_integrations_docker" {
-  targets = []
+  targets = discovery.docker.linux.targets
 
+  // KEEP somente containers com logging.enable=true
+  rule {
+    source_labels = ["__meta_docker_container_label_logging_enable"]
+    regex         = "true"
+    action        = "keep"
+  }
+
+  // container_name
   rule {
     source_labels = ["__meta_docker_container_name"]
     regex         = "/(.*)"
     target_label  = "container_name"
   }
 
+  // instance (hostname)
   rule {
     target_label = "instance"
     replacement  = constants.hostname
