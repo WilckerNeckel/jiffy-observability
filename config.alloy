@@ -41,37 +41,63 @@
 // #### Logging Configuration ####
 // ###############################
 
-// Discover Docker containers and extract metadata.
+// Discover Docker containers
 discovery.docker "linux" {
   host = "unix:///var/run/docker.sock"
 }
 
-// Define a relabeling rule to create a service name from the container name.
+// Relabel Docker metadata
 discovery.relabel "logs_integrations_docker" {
-      targets = []
-  
-      rule {
-          source_labels = ["__meta_docker_container_name"]
-          regex = "/(.*)"
-          target_label = "container_name"
-      }
+  targets = []
 
-     rule {
-        target_label = "instance"
-        replacement  = constants.hostname
-    }
-
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container_name"
   }
 
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+}
 
-// Configure a loki.source.docker component to collect logs from Docker containers.
-loki.source.docker "default" {
-  host       = "unix:///var/run/docker.sock"
-  targets    = discovery.docker.linux.targets
-  relabel_rules = discovery.relabel.logs_integrations_docker.rules
+
+loki.process "docker_logs" {
+  // cria label empresa somente para containers jiffy-backend
+  stage.match {
+    selector = "{container_name=~\".*jiffy-backend.*\"}"
+
+    stage.json {
+      expressions = {
+        empresa = "empresa",
+      }
+    }
+
+    stage.labels {
+      values = {
+        empresa = "empresa",
+      }
+    }
+  }
+
   forward_to = [loki.write.local.receiver]
 }
 
+// ----------------------------------------------------
+// Collect logs from Docker
+// ----------------------------------------------------
+loki.source.docker "default" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.linux.targets
+  relabel_rules = discovery.relabel.logs_integrations_docker.rules
+
+  forward_to = [loki.process.docker_logs.receiver]
+}
+
+// ----------------------------------------------------
+// Send logs to Loki
+// ----------------------------------------------------
 loki.write "local" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
