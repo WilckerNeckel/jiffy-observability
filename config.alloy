@@ -46,7 +46,7 @@ discovery.docker "linux" {
   host = "unix:///var/run/docker.sock"
 }
 
-// Relabel Docker metadata
+// Relabel Docker metadata (FILTRA + CRIA LABELS BASE)
 discovery.relabel "logs_integrations_docker" {
   targets = discovery.docker.linux.targets
 
@@ -57,23 +57,22 @@ discovery.relabel "logs_integrations_docker" {
     action        = "keep"
   }
 
-  // container_name
+  // container_name (label base)
   rule {
     source_labels = ["__meta_docker_container_name"]
     regex         = "/(.*)"
     target_label  = "container_name"
   }
 
-  // instance (hostname)
+  // instance (label base)
   rule {
     target_label = "instance"
     replacement  = constants.hostname
   }
 }
 
-
+// Process logs (labels DERIVADOS, nunca base)
 loki.process "docker_logs" {
-  // cria label empresa somente para containers jiffy-backend
   stage.match {
     selector = "{container_name=~\".*jiffy-backend.*\"}"
 
@@ -93,20 +92,15 @@ loki.process "docker_logs" {
   forward_to = [loki.write.local.receiver]
 }
 
-// ----------------------------------------------------
-// Collect logs from Docker
-// ----------------------------------------------------
+// Collect logs (USA TARGETS JÁ RELABELED)
 loki.source.docker "default" {
-  host          = "unix:///var/run/docker.sock"
-  targets       = discovery.docker.linux.targets
-  relabel_rules = discovery.relabel.logs_integrations_docker.rules
+  host    = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.logs_integrations_docker.output
 
   forward_to = [loki.process.docker_logs.receiver]
 }
 
-// ----------------------------------------------------
 // Send logs to Loki
-// ----------------------------------------------------
 loki.write "local" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
