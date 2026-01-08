@@ -76,15 +76,19 @@ loki.process "docker_logs" {
   stage.match {
     selector = "{container_name=~\".*jiffy-backend.*\"}"
 
+    // Extrai campos do JSON do log
     stage.json {
       expressions = {
         empresa = "empresa",
+        event  = "eventName",
       }
     }
 
+    // Promove campos selecionados para labels
     stage.labels {
       values = {
         empresa = "empresa",
+        event  = "event",
       }
     }
   }
