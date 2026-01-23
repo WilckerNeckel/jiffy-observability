@@ -44,7 +44,7 @@ services:
         condition: service_healthy
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
-      # - ./.data/grafana:/var/lib/grafana
+      - ./.data/grafana:/var/lib/grafana
     networks:
       - loki
       - traefik-proxy

@@ -2,3 +2,4 @@ loki-data
 .env
 todolist.md
 docker-compose.override.yml
+.data
