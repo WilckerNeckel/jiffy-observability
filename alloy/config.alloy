@@ -2,40 +2,64 @@
 // #### Metrics Configuration ####
 // ###############################
 
-// Host Cadvisor on the Docker socket to expose container metrics.
-// prometheus.exporter.cadvisor "example" {
-//   docker_only = true
-// }
+// Scrape do cAdvisor via HTTP (container externo)
+prometheus.scrape "cadvisor" {
+  targets = [
+    {
+      __address__ = "cadvisor:8080",
+    }
+  ]
 
-// discovery.relabel "example" {
-//     targets = prometheus.exporter.cadvisor.example.targets
+  scrape_interval = "15s"
 
-//     rule {
-//         target_label = "job"
-//         replacement  = "integrations/docker"
-//     }
+  // Labels base (infra)
+  relabel {
+    target_label = "job"
+    replacement  = "cadvisor"
+  }
 
-//     rule {
-//         target_label = "instance"
-//         replacement  = constants.hostname
-//     }
-// }
+  relabel {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
 
-// // Configure a prometheus.scrape component to collect cadvisor metrics.
-// prometheus.scrape "scraper" {
-//   targets    = discovery.relabel.example.output
-//   forward_to = [ prometheus.remote_write.demo.receiver ]
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// -------------------------------
+// Node Exporter (bare metal)
+// -------------------------------
+
+prometheus.scrape "node_exporter" {
+  targets = [
+    {
+      __address__ = "host.docker.internal:9100",
+    }
+  ]
+
+  scrape_interval = "15s"
+
+  relabel {
+    target_label = "job"
+    replacement  = "node-exporter"
+  }
+
+  relabel {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}
 
 
-//   scrape_interval = "10s"
-// }
+// Envio passivo para o Prometheus
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
 
-// // Configure a prometheus.remote_write component to send metrics to a Prometheus server.
-// prometheus.remote_write "demo" {
-//   endpoint {
-//     url = "http://prometheus:9090/api/v1/write"
-//   }
-// }
 
 // ###############################
 // #### Logging Configuration ####
