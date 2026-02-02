@@ -39,7 +39,7 @@ ingester:
   chunk_retain_period: 1m
 
 limits_config:
-  retention_period: 7d
+  retention_period: 20d
   max_query_length: 720h
   ingestion_rate_mb: 4
   ingestion_burst_size_mb: 8
