@@ -21,13 +21,24 @@ services:
       - loki
       - traefik-proxy
 
-  # prometheus:
-  #   image: prom/prometheus:${PROMETHEUS_VERSION:-v3.5.0}
-  #   command:
-  #     - --web.enable-remote-write-receiver
-  #     - --config.file=/etc/prometheus/prometheus.yml
-  #   ports:
-  #     - "9090:9090"
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./.data/prometheus:/prometheus
+    networks:
+      - traefik-proxy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   grafana:
     image: grafana/grafana:12.3.1
