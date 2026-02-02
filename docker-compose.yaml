@@ -11,7 +11,6 @@ volumes:
 services:
   loki:
     image: grafana/loki:2.9.17
-    user: "10001:10001"
     volumes:
       - ./loki-config.yaml:/etc/loki/loki-config.yaml
       - loki-data:/var/loki
@@ -48,7 +47,6 @@ services:
 
   grafana:
     image: grafana/grafana:12.3.1
-    user: "472:472"
     environment:
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
