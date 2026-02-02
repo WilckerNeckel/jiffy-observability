@@ -2,9 +2,9 @@ antes de fazer o deploy você precisa dar esses comandos para setar as permissõ
 
 ```bash
 mkdir -p ./data/loki-data
-sudo chown 10001:10001 ./loki-data
-sudo chmod -R 755 ./loki-data
+sudo chown 10001:10001 ./data/loki-data
+sudo chmod -R 755 ./data/loki-data
 
-mkdir -p ./data/grafana
-sudo chown -R 472:472 .data/grafana
+mkdir -p ./data/grafana-data
+sudo chown -R 472:472 ./data/grafana-data
 ```
