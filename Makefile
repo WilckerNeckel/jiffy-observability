@@ -2,10 +2,13 @@
 # Observability Stack - Makefile
 # ======================================
 
-COMPOSE = docker compose --project-directory .
+OVERRIDE_FILE := docker-compose.override.yml
+OVERRIDE := $(if $(wildcard $(OVERRIDE_FILE)),-f $(OVERRIDE_FILE),)
+
+COMPOSE = docker compose --project-directory . $(OVERRIDE)
 BASE    = -f compose/base.yml
 
-OBSERVABILITY_FILES = \
+ALL_FILES = \
 	-f compose/base.yml \
 	-f compose/alloy-agent.yml \
 	-f compose/cadvisor.yml \
@@ -14,119 +17,112 @@ OBSERVABILITY_FILES = \
 	-f compose/loki.yml \
 	-f compose/grafana.yml
 
-LOG_FILES_alloy        = -f compose/alloy-agent.yml
-LOG_FILES_cadvisor     = -f compose/cadvisor.yml
-LOG_FILES_otel         = -f compose/otel-collector.yml
-LOG_FILES_prometheus   = -f compose/prometheus.yml
-LOG_FILES_loki         = -f compose/loki.yml
-LOG_FILES_grafana      = -f compose/grafana.yml
+ALLOY_FILE        = -f compose/alloy-agent.yml
+CADVISOR_FILE     = -f compose/cadvisor.yml
+OTEL_FILE         = -f compose/otel-collector.yml
+PROMETHEUS_FILE   = -f compose/prometheus.yml
+LOKI_FILE         = -f compose/loki.yml
+GRAFANA_FILE      = -f compose/grafana.yml
+
 
 # ---------- Scenarios ----------
 
-.PHONY: backend observability full down ps logs grafana prometheus loki cadvisor alloy otel down-all up-all log-alloy log-cadvisor log-otel log-prometheus log-loki log-grafana
+.PHONY: \
+	backend observability \
+	up-all down-all ps logs \
+	alloy cadvisor otel prometheus loki grafana \
+	log-alloy log-cadvisor log-otel log-prometheus log-loki log-grafana \
+	restart-alloy restart-cadvisor restart-otel restart-prometheus restart-loki restart-grafana
 
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
 backend:
-	$(COMPOSE) $(BASE) \
-		-f compose/alloy-agent.yml \
-		-f compose/cadvisor.yml \
-		up -d
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) $(CADVISOR_FILE) up -d
 
 ## Observability central server
 ## Prometheus + Loki + Grafana
 observability:
 	$(COMPOSE) $(BASE) \
-		-f compose/prometheus.yml \
-		-f compose/loki.yml \
-		-f compose/otel-collector.yml \
-		-f compose/grafana.yml \
+		$(PROMETHEUS_FILE) \
+		$(LOKI_FILE) \
+		$(OTEL_FILE) \
+		$(GRAFANA_FILE) \
 		up -d
 
 ## Full stack (lab / debug only)
 up-all:
-	docker compose --project-directory . $(OBSERVABILITY_FILES) up -d
+	$(COMPOSE) $(ALL_FILES) up -d
 
-# ---------- Utilities ----------
-
-## Stop all services defined by the selected composes
 down-all:
-	docker compose --project-directory . $(OBSERVABILITY_FILES) down --remove-orphans
+	$(COMPOSE) $(ALL_FILES) down --remove-orphans
 
 ## Show running containers
 ps:
-	$(COMPOSE) $(OBSERVABILITY_FILES) ps
+	$(COMPOSE) $(ALL_FILES) ps
 
 ## Tail logs (usage: make logs SERVICE=grafana)
 logs:
 	$(COMPOSE) $(BASE) logs -f $(SERVICE)
 
 
+# ---------- Single services ----------
+
 alloy:
-	$(COMPOSE) $(BASE) \
-		-f compose/alloy-agent.yml \
-		up -d alloy
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) up -d alloy
 
 cadvisor:
-	$(COMPOSE) $(BASE) \
-		-f compose/cadvisor.yml \
-		up -d cadvisor
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) up -d cadvisor
 
 otel:
-	$(COMPOSE) $(BASE) \
-		-f compose/otel-collector.yml \
-		up -d otel-collector
+	$(COMPOSE) $(BASE) $(OTEL_FILE) up -d otel-collector
 
 prometheus:
-	$(COMPOSE) $(BASE) \
-		-f compose/prometheus.yml \
-		up -d prometheus
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) up -d prometheus
 
 loki:
-	$(COMPOSE) $(BASE) \
-		-f compose/loki.yml \
-		up -d loki
+	$(COMPOSE) $(BASE) $(LOKI_FILE) up -d loki
 
 grafana:
-	$(COMPOSE) $(BASE) \
-		-f compose/grafana.yml \
-		up -d grafana
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) up -d grafana
 
+
+# ---------- Logs ----------
 
 log-alloy:
-	$(COMPOSE) $(BASE) $(LOG_FILES_alloy) logs -f alloy
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) logs -f alloy
 
 log-cadvisor:
-	$(COMPOSE) $(BASE) $(LOG_FILES_cadvisor) logs -f cadvisor
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) logs -f cadvisor
 
 log-otel:
-	$(COMPOSE) $(BASE) $(LOG_FILES_otel) logs -f otel-collector
+	$(COMPOSE) $(BASE) $(OTEL_FILE) logs -f otel-collector
 
 log-prometheus:
-	$(COMPOSE) $(BASE) $(LOG_FILES_prometheus) logs -f prometheus
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) logs -f prometheus
 
 log-loki:
-	$(COMPOSE) $(BASE) $(LOG_FILES_loki) logs -f loki
+	$(COMPOSE) $(BASE) $(LOKI_FILE) logs -f loki
 
 log-grafana:
-	$(COMPOSE) $(BASE) $(LOG_FILES_grafana) logs -f grafana
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) logs -f grafana
 
-.PHONY: restart-alloy restart-cadvisor restart-otel restart-prometheus restart-loki restart-grafana
+
+# ---------- Restart ----------
 
 restart-alloy:
-	$(COMPOSE) $(BASE) $(LOG_FILES_alloy) restart alloy
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) restart alloy
 
 restart-cadvisor:
-	$(COMPOSE) $(BASE) $(LOG_FILES_cadvisor) restart cadvisor
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) restart cadvisor
 
 restart-otel:
-	$(COMPOSE) $(BASE) $(LOG_FILES_otel) restart otel-collector
+	$(COMPOSE) $(BASE) $(OTEL_FILE) restart otel-collector
 
 restart-prometheus:
-	$(COMPOSE) $(BASE) $(LOG_FILES_prometheus) restart prometheus
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) restart prometheus
 
 restart-loki:
-	$(COMPOSE) $(BASE) $(LOG_FILES_loki) restart loki
+	$(COMPOSE) $(BASE) $(LOKI_FILE) restart loki
 
 restart-grafana:
-	$(COMPOSE) $(BASE) $(LOG_FILES_grafana) restart grafana
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) restart grafana
