@@ -14,9 +14,16 @@ OBSERVABILITY_FILES = \
 	-f compose/loki.yml \
 	-f compose/grafana.yml
 
+LOG_FILES_alloy        = -f compose/alloy-agent.yml
+LOG_FILES_cadvisor     = -f compose/cadvisor.yml
+LOG_FILES_otel         = -f compose/otel-collector.yml
+LOG_FILES_prometheus   = -f compose/prometheus.yml
+LOG_FILES_loki         = -f compose/loki.yml
+LOG_FILES_grafana      = -f compose/grafana.yml
+
 # ---------- Scenarios ----------
 
-.PHONY: backend observability full down ps logs grafana prometheus loki cadvisor alloy otel down-all up-all
+.PHONY: backend observability full down ps logs grafana prometheus loki cadvisor alloy otel down-all up-all log-alloy log-cadvisor log-otel log-prometheus log-loki log-grafana
 
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
@@ -84,3 +91,22 @@ grafana:
 	$(COMPOSE) $(BASE) \
 		-f compose/grafana.yml \
 		up -d grafana
+
+
+log-alloy:
+	$(COMPOSE) $(BASE) $(LOG_FILES_alloy) logs -f alloy
+
+log-cadvisor:
+	$(COMPOSE) $(BASE) $(LOG_FILES_cadvisor) logs -f cadvisor
+
+log-otel:
+	$(COMPOSE) $(BASE) $(LOG_FILES_otel) logs -f otel-collector
+
+log-prometheus:
+	$(COMPOSE) $(BASE) $(LOG_FILES_prometheus) logs -f prometheus
+
+log-loki:
+	$(COMPOSE) $(BASE) $(LOG_FILES_loki) logs -f loki
+
+log-grafana:
+	$(COMPOSE) $(BASE) $(LOG_FILES_grafana) logs -f grafan
