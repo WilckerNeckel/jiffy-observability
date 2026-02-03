@@ -2,31 +2,13 @@
 # Observability Stack - Makefile
 # ======================================
 
-# ---------- Override (optional) ----------
+COMPOSE = docker compose --project-directory .
 
-OVERRIDE_FILE := docker-compose.override.yml
-OVERRIDE := $(if $(wildcard $(OVERRIDE_FILE)),-f $(OVERRIDE_FILE),)
-
-# ---------- Compose commands ----------
-
-# Core compose (NO override) – ops, logs, restart, down
-COMPOSE_CORE     = docker compose --project-directory .
-
-# Runtime compose (WITH override) – up, lab, exposed ports
-COMPOSE_OVERRIDE = docker compose --project-directory . $(OVERRIDE)
+# ---------- Base compose ----------
 
 BASE = -f compose/base.yml
 
-# ---------- Compose files ----------
-
-ALL_FILES = \
-	-f compose/base.yml \
-	-f compose/alloy-agent.yml \
-	-f compose/cadvisor.yml \
-	-f compose/otel-collector.yml \
-	-f compose/prometheus.yml \
-	-f compose/loki.yml \
-	-f compose/grafana.yml
+# ---------- Service files ----------
 
 ALLOY_FILE      = -f compose/alloy-agent.yml
 CADVISOR_FILE   = -f compose/cadvisor.yml
@@ -34,6 +16,34 @@ OTEL_FILE       = -f compose/otel-collector.yml
 PROMETHEUS_FILE = -f compose/prometheus.yml
 LOKI_FILE       = -f compose/loki.yml
 GRAFANA_FILE    = -f compose/grafana.yml
+
+# Conjunto completo de arquivos base (para up-all, ps, down-all, logs)
+ALL_FILES = \
+	$(BASE) \
+	$(ALLOY_FILE) \
+	$(CADVISOR_FILE) \
+	$(OTEL_FILE) \
+	$(PROMETHEUS_FILE) \
+	$(LOKI_FILE) \
+	$(GRAFANA_FILE)
+
+# ---------- Optional overrides (per service) ----------
+
+ALLOY_OVERRIDE      = $(if $(wildcard compose/alloy-agent.override.yml),-f compose/alloy-agent.override.yml,)
+CADVISOR_OVERRIDE   = $(if $(wildcard compose/cadvisor.override.yml),-f compose/cadvisor.override.yml,)
+OTEL_OVERRIDE       = $(if $(wildcard compose/otel-collector.override.yml),-f compose/otel-collector.override.yml,)
+PROMETHEUS_OVERRIDE = $(if $(wildcard compose/prometheus.override.yml),-f compose/prometheus.override.yml,)
+LOKI_OVERRIDE       = $(if $(wildcard compose/loki.override.yml),-f compose/loki.override.yml,)
+GRAFANA_OVERRIDE    = $(if $(wildcard compose/grafana.override.yml),-f compose/grafana.override.yml,)
+
+# Conjunto completo de overrides (para up-all / observability / backend)
+ALL_OVERRIDES = \
+	$(ALLOY_OVERRIDE) \
+	$(CADVISOR_OVERRIDE) \
+	$(OTEL_OVERRIDE) \
+	$(PROMETHEUS_OVERRIDE) \
+	$(LOKI_OVERRIDE) \
+	$(GRAFANA_OVERRIDE)
 
 
 # ---------- Scenarios ----------
@@ -49,113 +59,118 @@ GRAFANA_FILE    = -f compose/grafana.yml
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
 backend:
-	$(COMPOSE_OVERRIDE) $(BASE) $(ALLOY_FILE) $(CADVISOR_FILE) up -d
+	$(COMPOSE) \
+		$(BASE) \
+		$(ALLOY_FILE) $(ALLOY_OVERRIDE) \
+		$(CADVISOR_FILE) $(CADVISOR_OVERRIDE) \
+		up -d
 
 ## Observability central server
-## Prometheus + Loki + Grafana
+## Prometheus + Loki + Grafana + OTEL
 observability:
-	$(COMPOSE_OVERRIDE) $(BASE) \
-		$(PROMETHEUS_FILE) \
-		$(LOKI_FILE) \
-		$(OTEL_FILE) \
-		$(GRAFANA_FILE) \
+	$(COMPOSE) \
+		$(BASE) \
+		$(PROMETHEUS_FILE) $(PROMETHEUS_OVERRIDE) \
+		$(LOKI_FILE)       $(LOKI_OVERRIDE) \
+		$(OTEL_FILE)       $(OTEL_OVERRIDE) \
+		$(GRAFANA_FILE)    $(GRAFANA_OVERRIDE) \
 		up -d
 
 ## Full stack (lab / debug only)
 up-all:
-	$(COMPOSE_OVERRIDE) $(ALL_FILES) up -d
+	$(COMPOSE) $(ALL_FILES) $(ALL_OVERRIDES) up -d
 
 down-all:
-	$(COMPOSE_CORE) $(ALL_FILES) down --remove-orphans
+	$(COMPOSE) $(ALL_FILES) down --remove-orphans
 
 ## Show running containers
 ps:
-	$(COMPOSE_CORE) $(ALL_FILES) ps
+	$(COMPOSE) $(ALL_FILES) ps
 
 ## Tail logs (usage: make logs SERVICE=grafana)
 logs:
-	$(COMPOSE_CORE) $(BASE) logs -f $(SERVICE)
+	$(COMPOSE) $(ALL_FILES) logs -f $(SERVICE)
 
 
 # ---------- Single services (UP) ----------
 
 alloy:
-	$(COMPOSE_OVERRIDE) $(BASE) $(ALLOY_FILE) up -d alloy
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
 
 cadvisor:
-	$(COMPOSE_OVERRIDE) $(BASE) $(CADVISOR_FILE) up -d cadvisor
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) $(CADVISOR_OVERRIDE) up -d cadvisor
 
 otel:
-	$(COMPOSE_OVERRIDE) $(BASE) $(OTEL_FILE) up -d otel-collector
+	$(COMPOSE) $(BASE) $(OTEL_FILE) $(OTEL_OVERRIDE) up -d otel-collector
 
 prometheus:
-	$(COMPOSE_OVERRIDE) $(BASE) $(PROMETHEUS_FILE) up -d prometheus
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) $(PROMETHEUS_OVERRIDE) up -d prometheus
 
 loki:
-	$(COMPOSE_OVERRIDE) $(BASE) $(LOKI_FILE) up -d loki
+	$(COMPOSE) $(BASE) $(LOKI_FILE) $(LOKI_OVERRIDE) up -d loki
 
 grafana:
-	$(COMPOSE_OVERRIDE) $(BASE) $(GRAFANA_FILE) up -d grafana
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) $(GRAFANA_OVERRIDE) up -d grafana
 
 
-# ---------- Logs ----------
+# ---------- Logs (por serviço) ----------
 
 log-alloy:
-	$(COMPOSE_CORE) $(BASE) $(ALLOY_FILE) logs -f alloy
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) logs -f alloy
 
 log-cadvisor:
-	$(COMPOSE_CORE) $(BASE) $(CADVISOR_FILE) logs -f cadvisor
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) logs -f cadvisor
 
 log-otel:
-	$(COMPOSE_CORE) $(BASE) $(OTEL_FILE) logs -f otel-collector
+	$(COMPOSE) $(BASE) $(OTEL_FILE) logs -f otel-collector
 
 log-prometheus:
-	$(COMPOSE_CORE) $(BASE) $(PROMETHEUS_FILE) logs -f prometheus
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) logs -f prometheus
 
 log-loki:
-	$(COMPOSE_CORE) $(BASE) $(LOKI_FILE) logs -f loki
+	$(COMPOSE) $(BASE) $(LOKI_FILE) logs -f loki
 
 log-grafana:
-	$(COMPOSE_CORE) $(BASE) $(GRAFANA_FILE) logs -f grafana
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) logs -f grafana
 
 
 # ---------- Restart ----------
 
 restart-alloy:
-	$(COMPOSE_CORE) $(BASE) $(ALLOY_FILE) restart alloy
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) restart alloy
 
 restart-cadvisor:
-	$(COMPOSE_CORE) $(BASE) $(CADVISOR_FILE) restart cadvisor
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) restart cadvisor
 
 restart-otel:
-	$(COMPOSE_CORE) $(BASE) $(OTEL_FILE) restart otel-collector
+	$(COMPOSE) $(BASE) $(OTEL_FILE) restart otel-collector
 
 restart-prometheus:
-	$(COMPOSE_CORE) $(BASE) $(PROMETHEUS_FILE) restart prometheus
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) restart prometheus
 
 restart-loki:
-	$(COMPOSE_CORE) $(BASE) $(LOKI_FILE) restart loki
+	$(COMPOSE) $(BASE) $(LOKI_FILE) restart loki
 
 restart-grafana:
-	$(COMPOSE_CORE) $(BASE) $(GRAFANA_FILE) restart grafana
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) restart grafana
 
 
 # ---------- Shutdown (isolated) ----------
 
 down-alloy:
-	$(COMPOSE_CORE) $(BASE) $(ALLOY_FILE) down
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) down
 
 down-cadvisor:
-	$(COMPOSE_CORE) $(BASE) $(CADVISOR_FILE) down
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) down
 
 down-otel:
-	$(COMPOSE_CORE) $(BASE) $(OTEL_FILE) down
+	$(COMPOSE) $(BASE) $(OTEL_FILE) down
 
 down-prometheus:
-	$(COMPOSE_CORE) $(BASE) $(PROMETHEUS_FILE) down
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) down
 
 down-loki:
-	$(COMPOSE_CORE) $(BASE) $(LOKI_FILE) down
+	$(COMPOSE) $(BASE) $(LOKI_FILE) down
 
 down-grafana:
-	$(COMPOSE_CORE) $(BASE) $(GRAFANA_FILE) down
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) down

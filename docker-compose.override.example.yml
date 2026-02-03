@@ -1,8 +1,0 @@
-services:
-  grafana:
-    ports:
-      - "4871:3000"
-  otel-collector:
-    ports:
-      - "4318:4318"   # OTLP HTTP
-

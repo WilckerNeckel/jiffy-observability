@@ -2,3 +2,4 @@
 todolist.md
 docker-compose.override.yml
 .data
+compose/*.override.yml
