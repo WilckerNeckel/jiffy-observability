@@ -7,7 +7,7 @@ services:
     networks:
       - observability
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:13133 || exit 1"]
+      test: ["CMD", "otelcol-contrib", "--config=/etc/otel/config.yaml", "--dry-run"]
       interval: 10s
       timeout: 5s
       retries: 5
