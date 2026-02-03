@@ -7,7 +7,7 @@ BASE    = -f compose/base.yml
 
 # ---------- Scenarios ----------
 
-.PHONY: backend observability full down ps logs grafana prometheus loki
+.PHONY: backend observability full down ps logs grafana prometheus loki cadvisor alloy otel
 
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
