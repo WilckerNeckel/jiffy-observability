@@ -110,3 +110,23 @@ log-loki:
 
 log-grafana:
 	$(COMPOSE) $(BASE) $(LOG_FILES_grafana) logs -f grafan
+
+.PHONY: restart-alloy restart-cadvisor restart-otel restart-prometheus restart-loki restart-grafana
+
+restart-alloy:
+	$(COMPOSE) $(BASE) $(LOG_FILES_alloy) restart alloy
+
+restart-cadvisor:
+	$(COMPOSE) $(BASE) $(LOG_FILES_cadvisor) restart cadvisor
+
+restart-otel:
+	$(COMPOSE) $(BASE) $(LOG_FILES_otel) restart otel-collector
+
+restart-prometheus:
+	$(COMPOSE) $(BASE) $(LOG_FILES_prometheus) restart prometheus
+
+restart-loki:
+	$(COMPOSE) $(BASE) $(LOG_FILES_loki) restart loki
+
+restart-grafana:
+	$(COMPOSE) $(BASE) $(LOG_FILES_grafana) restart grafana
