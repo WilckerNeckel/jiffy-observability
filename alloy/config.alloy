@@ -67,7 +67,7 @@ prometheus.remote_write "default" {
 
     basic_auth {
       username = "alloy"
-      password = env("PROM_WRITE_PASSWORD")
+      password = env("OTEL_PASSWORD")
     }
   }
 }
@@ -151,7 +151,7 @@ loki.write "remote" {
     url = "https://otel.jiffy.run/v1/logs"
     basic_auth {
       username = "alloy"
-      password = env("LOKI_PASSWORD")
+      password = env("OTEL_PASSWORD")
     }
   }
 }
