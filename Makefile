@@ -44,7 +44,7 @@ up-all:
 
 ## Stop all services defined by the selected composes
 down-all:
-	docker compose --project-directory . $(OBSERVABILITY_FILES) down
+	docker compose --project-directory . $(OBSERVABILITY_FILES) down --remove-orphans
 
 ## Show running containers
 ps:
