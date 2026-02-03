@@ -1,0 +1,1 @@
+quando for utilizar um collector central com alloy onde temos o alloy collector enviando os dados de métricas, logs tracing para o alloy gateway, use os arquivos de configuração desta pasta.

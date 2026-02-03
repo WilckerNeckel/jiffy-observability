@@ -1,0 +1,189 @@
+otelcol.auth.basic "default" {
+  username = "alloy"
+  password = sys.env("OTEL_PASSWORD")
+}
+
+otelcol.exporter.otlphttp "gateway" {
+  client {
+    endpoint = "https://otel.jiffy.run"  // seu domínio apontando pro receiver OTLP HTTP
+    auth     = otelcol.auth.basic.default.handler
+  }
+}
+// ###############################
+// #### Metrics Configuration ####
+// ###############################
+
+// Scrape do cAdvisor via HTTP (container externo)
+prometheus.scrape "cadvisor" {
+  targets = [
+    {
+      __address__ = "cadvisor:8080",
+    },
+  ]
+
+  scrape_interval = "15s"
+
+  forward_to = [prometheus.relabel.cadvisor.receiver]
+}
+
+prometheus.relabel "cadvisor" {
+  rule {
+    target_label = "job"
+    replacement  = "cadvisor"
+  }
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  // forward_to = [prometheus.remote_write.default.receiver]
+  forward_to = [otelcol.receiver.prometheus.to_otlp.receiver]
+}
+
+// -------------------------------
+// Node Exporter (bare metal)
+// -------------------------------
+
+prometheus.scrape "node_exporter" {
+  targets = [
+    {
+      __address__ = "host.docker.internal:9100",
+    },
+  ]
+
+  scrape_interval = "15s"
+
+  forward_to = [prometheus.relabel.node_exporter.receiver]
+}
+
+prometheus.relabel "node_exporter" {
+  rule {
+    target_label = "job"
+    replacement  = "node-exporter"
+  }
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  // forward_to = [prometheus.remote_write.default.receiver]
+  forward_to = [otelcol.receiver.prometheus.to_otlp.receiver]
+}
+
+otelcol.receiver.prometheus "to_otlp" {
+  output {
+    metrics = [otelcol.exporter.otlphttp.gateway.input]
+  }
+}
+
+// // Envio passivo para o Prometheus
+// prometheus.remote_write "default" {
+//   endpoint {
+//     url = "http://prometheus:9090/api/v1/write"
+//   }
+// }
+
+// Envio passivo para o Prometheus
+// prometheus.remote_write "default" {
+//   endpoint {
+//     url = "https://otel.jiffy.run/v1/metrics"
+
+//     basic_auth {
+//       username = "alloy"
+//       password = sys.env("OTEL_PASSWORD")
+//     }
+//   }
+// }
+
+// ###############################
+// #### Logging Configuration ####
+// ###############################
+
+// Discover Docker containers
+discovery.docker "linux" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Relabel Docker metadata (FILTRA + CRIA LABELS BASE)
+discovery.relabel "logs_integrations_docker" {
+  targets = discovery.docker.linux.targets
+
+  // KEEP somente containers com logging.enable=true
+  rule {
+    source_labels = ["__meta_docker_container_label_logging_enable"]
+    regex         = "true"
+    action        = "keep"
+  }
+
+  // container_name (label base)
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container_name"
+  }
+
+  // instance (label base)
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+}
+
+// Process logs (labels DERIVADOS, nunca base)
+loki.process "docker_logs" {
+  stage.match {
+    selector = "{container_name=~\".*jiffy-backend.*\"}"
+
+    // Extrai campos do JSON do log
+    stage.json {
+      expressions = {
+        empresa = "empresa",
+        event  = "eventName",
+      }
+    }
+
+    // Promove campos selecionados para labels
+    stage.labels {
+      values = {
+        empresa = "empresa",
+        event  = "event",
+      }
+    }
+  }
+
+  // forward_to = [loki.write.remote.receiver]
+  forward_to = [otelcol.receiver.loki.to_otlp.receiver]
+}
+
+// Collect logs (USA TARGETS JÁ RELABELED)
+loki.source.docker "default" {
+  host    = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.logs_integrations_docker.output
+
+  forward_to = [loki.process.docker_logs.receiver]
+}
+
+// Send logs to Loki
+// loki.write "local" {
+//   endpoint {
+//     url = "http://loki:3100/loki/api/v1/push"
+//   }
+// }
+
+otelcol.receiver.loki "to_otlp" {
+  output {
+    logs = [otelcol.exporter.otlphttp.gateway.input]
+  }
+}
+
+loki.write "remote" {
+  endpoint {
+    url = "https://otel.jiffy.run/v1/logs"
+    basic_auth {
+      username = "alloy"
+      password = sys.env("OTEL_PASSWORD")
+    }
+  }
+}
