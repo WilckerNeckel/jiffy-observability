@@ -109,7 +109,7 @@ log-loki:
 	$(COMPOSE) $(BASE) $(LOG_FILES_loki) logs -f loki
 
 log-grafana:
-	$(COMPOSE) $(BASE) $(LOG_FILES_grafana) logs -f grafan
+	$(COMPOSE) $(BASE) $(LOG_FILES_grafana) logs -f grafana
 
 .PHONY: restart-alloy restart-cadvisor restart-otel restart-prometheus restart-loki restart-grafana
 
