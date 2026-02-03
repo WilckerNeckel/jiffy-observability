@@ -6,8 +6,3 @@ services:
       - ./otel:/etc/otel:ro
     networks:
       - observability
-    healthcheck:
-      test: ["CMD", "otelcol-contrib", "--config=/etc/otel/config.yaml", "--dry-run"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
