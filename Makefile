@@ -126,3 +126,25 @@ restart-loki:
 
 restart-grafana:
 	$(COMPOSE) $(BASE) $(GRAFANA_FILE) restart grafana
+
+# ---------- Shutdown ----------
+
+.PHONY: down-alloy down-cadvisor down-otel down-prometheus down-loki down-grafana
+
+down-alloy:
+	$(COMPOSE) $(BASE) $(ALLOY_FILE) down
+
+down-cadvisor:
+	$(COMPOSE) $(BASE) $(CADVISOR_FILE) down
+
+down-otel:
+	$(COMPOSE) $(BASE) $(OTEL_FILE) down
+
+down-prometheus:
+	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) down
+
+down-loki:
+	$(COMPOSE) $(BASE) $(LOKI_FILE) down
+
+down-grafana:
+	$(COMPOSE) $(BASE) $(GRAFANA_FILE) down
