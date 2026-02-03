@@ -21,10 +21,10 @@ exporters:
     endpoint: http://loki:3100/loki/api/v1/push
 
   # já preparado para traces
-  otlp/tempo:
-    endpoint: tempo:4317
-    tls:
-      insecure: true
+  # otlp/tempo:
+  #   endpoint: tempo:4317
+  #   tls:
+  #     insecure: true
 
 extensions:
   health_check:
@@ -44,7 +44,7 @@ service:
       processors: [batch]
       exporters: [loki]
 
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp/tempo]
+    # traces:
+    #   receivers: [otlp]
+    #   processors: [batch]
+    #   exporters: [otlp/tempo]
