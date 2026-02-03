@@ -143,7 +143,8 @@ loki.process "docker_logs" {
     }
   }
 
-  forward_to = [loki.write.remote.receiver]
+  // forward_to = [loki.write.remote.receiver]
+  forward_to = [otel.exporter.otlp.gateway.receiver]
 }
 
 // Collect logs (USA TARGETS JÁ RELABELED)
@@ -151,8 +152,7 @@ loki.source.docker "default" {
   host    = "unix:///var/run/docker.sock"
   targets = discovery.relabel.logs_integrations_docker.output
 
-  // forward_to = [loki.process.docker_logs.receiver]
-  forward_to = [otel.exporter.otlp.gateway.receiver]
+  forward_to = [loki.process.docker_logs.receiver]
 }
 
 // Send logs to Loki
