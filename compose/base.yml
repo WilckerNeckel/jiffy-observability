@@ -1,4 +1,4 @@
 networks:
-  loki:
+  observability:
   traefik-proxy:
     external: true

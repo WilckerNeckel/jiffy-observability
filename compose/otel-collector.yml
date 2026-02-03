@@ -6,7 +6,7 @@ services:
     volumes:
       - ./otel/config.yaml:/etc/otel/config.yaml:ro
     networks:
-      - traefik-proxy
+      - observability
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133/healthz"]
       interval: 10s

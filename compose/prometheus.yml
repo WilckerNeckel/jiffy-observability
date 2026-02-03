@@ -12,7 +12,7 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./.data/prometheus-data:/prometheus
     networks:
-      - traefik-proxy
+      - observability
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
       interval: 10s
