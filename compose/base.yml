@@ -1,0 +1,4 @@
+networks:
+  loki:
+  traefik-proxy:
+    external: true

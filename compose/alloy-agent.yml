@@ -1,0 +1,20 @@
+services:
+  alloy:
+    image: grafana/alloy:v1.12.1
+    command: >
+      run
+      --server.http.listen-addr=0.0.0.0:12345
+      --storage.path=/var/lib/alloy/data
+      /etc/alloy/config.alloy
+    volumes:
+       - ./alloy/config.alloy:/etc/alloy/config.alloy
+       - /var/run/docker.sock:/var/run/docker.sock
+      # - ./.data/alloy:/var/lib/alloy/data
+    depends_on:
+      loki:
+        condition: service_healthy
+    networks:
+      - loki
+      - traefik-proxy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
