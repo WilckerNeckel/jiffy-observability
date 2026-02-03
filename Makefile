@@ -2,7 +2,7 @@
 # Observability Stack - Makefile
 # ======================================
 
-COMPOSE = docker compose
+COMPOSE = docker compose --project-directory .
 BASE    = -f compose/base.yml
 
 # ---------- Scenarios ----------
