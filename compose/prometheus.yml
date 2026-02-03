@@ -5,7 +5,8 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --storage.tsdb.retention.time=15d
-      - --enable-feature=remote-write-receiver
+      # - --enable-feature=remote-write-receiver
+      - --web.enable-remote-write-receiver
       - --web.enable-lifecycle
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
