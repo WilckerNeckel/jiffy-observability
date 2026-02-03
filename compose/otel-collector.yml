@@ -4,7 +4,7 @@ services:
     container_name: otel-collector
     command: ["--config=/etc/otel/config.yaml"]
     volumes:
-      - ./otel/config.yaml:/etc/otel/config.yaml:ro
+      - ./otel:/etc/otel:ro
     networks:
       - observability
     healthcheck:
