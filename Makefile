@@ -16,7 +16,7 @@ OBSERVABILITY_FILES = \
 
 # ---------- Scenarios ----------
 
-.PHONY: backend observability full down ps logs grafana prometheus loki cadvisor alloy otel
+.PHONY: backend observability full down ps logs grafana prometheus loki cadvisor alloy otel down-all up-all
 
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
