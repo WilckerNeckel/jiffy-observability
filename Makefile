@@ -12,7 +12,6 @@ BASE = -f compose/base.yml
 
 ALLOY_FILE      = -f compose/alloy-agent.yml
 CADVISOR_FILE   = -f compose/cadvisor.yml
-OTEL_FILE       = -f compose/otel-collector.yml
 PROMETHEUS_FILE = -f compose/prometheus.yml
 LOKI_FILE       = -f compose/loki.yml
 GRAFANA_FILE    = -f compose/grafana.yml
@@ -22,7 +21,6 @@ ALL_FILES = \
 	$(BASE) \
 	$(ALLOY_FILE) \
 	$(CADVISOR_FILE) \
-	$(OTEL_FILE) \
 	$(PROMETHEUS_FILE) \
 	$(LOKI_FILE) \
 	$(GRAFANA_FILE)
@@ -31,7 +29,6 @@ ALL_FILES = \
 
 ALLOY_OVERRIDE      = $(if $(wildcard compose/alloy-agent.override.yml),-f compose/alloy-agent.override.yml,)
 CADVISOR_OVERRIDE   = $(if $(wildcard compose/cadvisor.override.yml),-f compose/cadvisor.override.yml,)
-OTEL_OVERRIDE       = $(if $(wildcard compose/otel-collector.override.yml),-f compose/otel-collector.override.yml,)
 PROMETHEUS_OVERRIDE = $(if $(wildcard compose/prometheus.override.yml),-f compose/prometheus.override.yml,)
 LOKI_OVERRIDE       = $(if $(wildcard compose/loki.override.yml),-f compose/loki.override.yml,)
 GRAFANA_OVERRIDE    = $(if $(wildcard compose/grafana.override.yml),-f compose/grafana.override.yml,)
@@ -40,7 +37,6 @@ GRAFANA_OVERRIDE    = $(if $(wildcard compose/grafana.override.yml),-f compose/g
 ALL_OVERRIDES = \
 	$(ALLOY_OVERRIDE) \
 	$(CADVISOR_OVERRIDE) \
-	$(OTEL_OVERRIDE) \
 	$(PROMETHEUS_OVERRIDE) \
 	$(LOKI_OVERRIDE) \
 	$(GRAFANA_OVERRIDE)
@@ -51,10 +47,10 @@ ALL_OVERRIDES = \
 .PHONY: \
 	backend observability \
 	up-all down-all ps logs \
-	alloy cadvisor otel prometheus loki grafana \
-	log-alloy log-cadvisor log-otel log-prometheus log-loki log-grafana \
-	restart-alloy restart-cadvisor restart-otel restart-prometheus restart-loki restart-grafana \
-	down-alloy down-cadvisor down-otel down-prometheus down-loki down-grafana
+	alloy cadvisor prometheus loki grafana \
+	log-alloy log-cadvisor log-prometheus log-loki log-grafana \
+	restart-alloy restart-cadvisor restart-prometheus restart-loki restart-grafana \
+	down-alloy down-cadvisor down-prometheus down-loki down-grafana
 
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
@@ -66,13 +62,12 @@ backend:
 		up -d
 
 ## Observability central server
-## Prometheus + Loki + Grafana + OTEL
+## Prometheus + Loki + Grafana 
 observability:
 	$(COMPOSE) \
 		$(BASE) \
 		$(PROMETHEUS_FILE) $(PROMETHEUS_OVERRIDE) \
 		$(LOKI_FILE)       $(LOKI_OVERRIDE) \
-		$(OTEL_FILE)       $(OTEL_OVERRIDE) \
 		$(GRAFANA_FILE)    $(GRAFANA_OVERRIDE) \
 		up -d
 
@@ -100,9 +95,6 @@ alloy:
 cadvisor:
 	$(COMPOSE) $(BASE) $(CADVISOR_FILE) $(CADVISOR_OVERRIDE) up -d cadvisor
 
-otel:
-	$(COMPOSE) $(BASE) $(OTEL_FILE) $(OTEL_OVERRIDE) up -d otel-collector
-
 prometheus:
 	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) $(PROMETHEUS_OVERRIDE) up -d prometheus
 
@@ -120,9 +112,6 @@ log-alloy:
 
 log-cadvisor:
 	$(COMPOSE) $(BASE) $(CADVISOR_FILE) logs -f cadvisor
-
-log-otel:
-	$(COMPOSE) $(BASE) $(OTEL_FILE) logs -f otel-collector
 
 log-prometheus:
 	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) logs -f prometheus
@@ -142,9 +131,6 @@ restart-alloy:
 restart-cadvisor:
 	$(COMPOSE) $(BASE) $(CADVISOR_FILE) restart cadvisor
 
-restart-otel:
-	$(COMPOSE) $(BASE) $(OTEL_FILE) restart otel-collector
-
 restart-prometheus:
 	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) restart prometheus
 
@@ -162,9 +148,6 @@ down-alloy:
 
 down-cadvisor:
 	$(COMPOSE) $(BASE) $(CADVISOR_FILE) down
-
-down-otel:
-	$(COMPOSE) $(BASE) $(OTEL_FILE) down
 
 down-prometheus:
 	$(COMPOSE) $(BASE) $(PROMETHEUS_FILE) down

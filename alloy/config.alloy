@@ -69,11 +69,11 @@ prometheus.relabel "node_exporter" {
 // Envio passivo para o Prometheus
 prometheus.remote_write "default" {
   endpoint {
-    url = "https://otel.jiffy.run/v1/metrics"
+    url = "https://prometheus.jiffy.run/api/v1/write"
 
     basic_auth {
       username = "alloy"
-      password = sys.env("OTEL_PASSWORD")
+      password = sys.env("ALLOY_PASSWORD")
     }
   }
 }
@@ -154,10 +154,10 @@ loki.source.docker "default" {
 
 loki.write "remote" {
   endpoint {
-    url = "https://otel.jiffy.run/v1/logs"
+    url = "https://loki.jiffy.run/loki/api/v1/push"
     basic_auth {
       username = "alloy"
-      password = sys.env("OTEL_PASSWORD")
+      password = sys.env("ALLOY_PASSWORD")
     }
   }
 }
