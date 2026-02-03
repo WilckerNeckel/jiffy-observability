@@ -53,13 +53,24 @@ prometheus.scrape "node_exporter" {
 }
 
 
+// // Envio passivo para o Prometheus
+// prometheus.remote_write "default" {
+//   endpoint {
+//     url = "http://prometheus:9090/api/v1/write"
+//   }
+// }
+
 // Envio passivo para o Prometheus
 prometheus.remote_write "default" {
   endpoint {
-    url = "http://prometheus:9090/api/v1/write"
+    url = "https://otel.jiffy.run/v1/metrics"
+
+    basic_auth {
+      username = "alloy"
+      password = env("PROM_WRITE_PASSWORD")
+    }
   }
 }
-
 
 // ###############################
 // #### Logging Configuration ####
@@ -129,8 +140,18 @@ loki.source.docker "default" {
 }
 
 // Send logs to Loki
-loki.write "local" {
+// loki.write "local" {
+//   endpoint {
+//     url = "http://loki:3100/loki/api/v1/push"
+//   }
+// }
+
+loki.write "remote" {
   endpoint {
-    url = "http://loki:3100/loki/api/v1/push"
+    url = "https://otel.jiffy.run/v1/logs"
+    basic_auth {
+      username = "alloy"
+      password = env("LOKI_PASSWORD")
+    }
   }
 }

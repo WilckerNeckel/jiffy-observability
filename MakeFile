@@ -23,6 +23,7 @@ observability:
 	$(COMPOSE) $(BASE) \
 		-f compose/prometheus.yml \
 		-f compose/loki.yml \
+		-f compose/otel-collector.yml \
 		-f compose/grafana.yml \
 		up -d
 
