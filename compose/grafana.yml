@@ -5,9 +5,9 @@ services:
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
-    depends_on:
-      loki:
-        condition: service_healthy
+    # depends_on:
+    #   loki:
+    #     condition: service_healthy
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./.data/grafana-data:/var/lib/grafana
