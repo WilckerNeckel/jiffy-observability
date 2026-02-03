@@ -55,7 +55,7 @@ down-all:
 
 ## Show running containers
 ps:
-	$(COMPOSE) $(BASE) ps
+	$(COMPOSE) $(OBSERVABILITY_FILES) ps
 
 ## Tail logs (usage: make logs SERVICE=grafana)
 logs:
