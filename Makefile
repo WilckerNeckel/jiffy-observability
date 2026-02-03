@@ -7,7 +7,7 @@ BASE    = -f compose/base.yml
 
 # ---------- Scenarios ----------
 
-.PHONY: backend observability full down ps logs
+.PHONY: backend observability full down ps logs grafana prometheus loki
 
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
@@ -50,3 +50,34 @@ ps:
 ## Tail logs (usage: make logs SERVICE=grafana)
 logs:
 	$(COMPOSE) $(BASE) logs -f $(SERVICE)
+
+
+alloy:
+	$(COMPOSE) $(BASE) \
+		-f compose/alloy-agent.yml \
+		up -d alloy
+
+cadvisor:
+	$(COMPOSE) $(BASE) \
+		-f compose/cadvisor.yml \
+		up -d cadvisor
+
+otel:
+	$(COMPOSE) $(BASE) \
+		-f compose/otel-collector.yml \
+		up -d otel-collector
+
+prometheus:
+	$(COMPOSE) $(BASE) \
+		-f compose/prometheus.yml \
+		up -d prometheus
+
+loki:
+	$(COMPOSE) $(BASE) \
+		-f compose/loki.yml \
+		up -d loki
+
+grafana:
+	$(COMPOSE) $(BASE) \
+		-f compose/grafana.yml \
+		up -d grafana
