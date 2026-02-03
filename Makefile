@@ -5,6 +5,15 @@
 COMPOSE = docker compose --project-directory .
 BASE    = -f compose/base.yml
 
+OBSERVABILITY_FILES = \
+	-f compose/base.yml \
+	-f compose/alloy-agent.yml \
+	-f compose/cadvisor.yml \
+	-f compose/otel-collector.yml \
+	-f compose/prometheus.yml \
+	-f compose/loki.yml \
+	-f compose/grafana.yml
+
 # ---------- Scenarios ----------
 
 .PHONY: backend observability full down ps logs grafana prometheus loki cadvisor alloy otel
@@ -28,20 +37,14 @@ observability:
 		up -d
 
 ## Full stack (lab / debug only)
-full:
-	$(COMPOSE) $(BASE) \
-		-f compose/alloy-agent.yml \
-		-f compose/cadvisor.yml \
-		-f compose/prometheus.yml \
-		-f compose/loki.yml \
-		-f compose/grafana.yml \
-		up -d
+up-all:
+	docker compose --project-directory . $(OBSERVABILITY_FILES) up -d
 
 # ---------- Utilities ----------
 
 ## Stop all services defined by the selected composes
-down:
-	$(COMPOSE) $(BASE) down
+down-all:
+	docker compose --project-directory . $(OBSERVABILITY_FILES) down
 
 ## Show running containers
 ps:
