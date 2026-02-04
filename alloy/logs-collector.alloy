@@ -5,13 +5,13 @@ discovery.docker "linux" {
 
 loki.source.docker "default" {
   host    = "unix:///var/run/docker.sock"
-  targets = discovery.relabel.logs_integrations_docker.output
+  targets = discovery.relabel.filter_docker_labels.output
 
-  forward_to = [loki.process.docker_logs.receiver]
+  forward_to = [loki.process.create_backend_labels.receiver]
 }
 
 // Relabel Docker metadata (FILTRA + CRIA LABELS BASE)
-discovery.relabel "logs_integrations_docker" {
+discovery.relabel "filter_docker_labels" {
   targets = discovery.docker.linux.targets
 
   // KEEP somente containers com logging.enable=true
@@ -35,8 +35,7 @@ discovery.relabel "logs_integrations_docker" {
   }
 }
 
-// Process logs (labels DERIVADOS, nunca base)
-loki.process "docker_logs" {
+loki.process "create_backend_labels" {
   stage.match {
     selector = "{container_name=~\".*jiffy-backend.*\"}"
 
