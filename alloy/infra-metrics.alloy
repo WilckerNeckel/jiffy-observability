@@ -1,0 +1,72 @@
+// -------------------------------
+// cAdvisor
+// -------------------------------
+prometheus.scrape "cadvisor" {
+  targets = [
+    {
+      __address__ = "cadvisor:8080",
+    },
+  ]
+
+  scrape_interval = "15s"
+
+  forward_to = [prometheus.relabel.cadvisor.receiver]
+}
+
+prometheus.relabel "cadvisor" {
+  rule {
+    target_label = "job"
+    replacement  = "cadvisor"
+  }
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// -------------------------------
+// Node Exporter (bare metal)
+// -------------------------------
+
+prometheus.scrape "node_exporter" {
+  targets = [
+    {
+      __address__ = "host.docker.internal:9100",
+    },
+  ]
+
+  scrape_interval = "15s"
+
+  forward_to = [prometheus.relabel.node_exporter.receiver]
+}
+
+prometheus.relabel "node_exporter" {
+  rule {
+    target_label = "job"
+    replacement  = "node-exporter"
+  }
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// -------------------------------
+// Export to Prometheus
+// -------------------------------
+prometheus.remote_write "default" {
+  endpoint {
+    url = "https://prometheus.jiffy.run/api/v1/write"
+
+    basic_auth {
+      username = "alloy"
+      password = sys.env("ALLOY_PASSWORD")
+    }
+  }
+}

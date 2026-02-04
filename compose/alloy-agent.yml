@@ -9,7 +9,8 @@ services:
             --storage.path=/var/lib/alloy/data
             /etc/alloy/config.alloy
         volumes:
-            - ./alloy/config.alloy:/etc/alloy/config.alloy
+            # - ./alloy/config.alloy:/etc/alloy/config.alloy
+            - ./alloy:/etc/alloy
             - /var/run/docker.sock:/var/run/docker.sock
             # - ./.data/alloy:/var/lib/alloy/data
         # depends_on:

@@ -1,0 +1,41 @@
+otelcol.receiver.otlp "from_agents" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    metrics = [otelcol.exporter.prometheus.to_prom.input]
+    logs    = [otelcol.exporter.loki.to_loki.input]
+    // traces  = [otelcol.exporter.otlphttp.tempo.input]  
+  }
+}
+
+
+// MÉTRICAS -> Prometheus
+otelcol.exporter.prometheus "to_prom" {
+  forward_to = [prometheus.remote_write.local.receiver]
+}
+
+prometheus.remote_write "local" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+// LOGS -> Loki
+otelcol.exporter.loki "to_loki" {
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// TRACES -> Tempo (quando quiser)
+// otelcol.exporter.otlphttp "tempo" {
+//   client {
+//     endpoint = "http://tempo:4318"
+//   }
+// }
