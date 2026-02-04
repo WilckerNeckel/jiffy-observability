@@ -62,10 +62,10 @@ loki.process "docker_logs" {
 
 loki.write "remote" {
   endpoint {
-    url = "https://loki.jiffy.run/loki/api/v1/push"
+    url = sys.env("LOKI_URL")
     basic_auth {
-      username = "alloy"
-      password = sys.env("ALLOY_PASSWORD")
+      username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+      password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
     }
   }
 }
