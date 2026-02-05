@@ -1,4 +1,6 @@
 networks:
   observability:
+  observability-sources:
+    external: true
   traefik-proxy:
     external: true

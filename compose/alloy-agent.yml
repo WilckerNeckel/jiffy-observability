@@ -1,21 +1,22 @@
 services:
-    alloy:
-        image: grafana/alloy:v1.12.1
-        environment:
-            OBSERVABILITY_BASIC_AUTH_PASSWORD: ${OBSERVABILITY_BASIC_AUTH_PASSWORD}
-            OBSERVABILITY_BASIC_AUTH_USERNAME: ${OBSERVABILITY_BASIC_AUTH_USERNAME}
-            LOKI_URL: ${LOKI_URL}
-            PROMETHEUS_URL: ${PROMETHEUS_URL}
-        command: >
-            run
-            --server.http.listen-addr=0.0.0.0:12345
-            --storage.path=/var/lib/alloy/data
-            /etc/alloy
-        volumes:
-            - ./alloy:/etc/alloy
-            - /var/run/docker.sock:/var/run/docker.sock
-            # - ./.data/alloy:/var/lib/alloy/data
-        networks:
-            - observability
-        extra_hosts:
-            - "host.docker.internal:host-gateway"
+  alloy:
+    image: grafana/alloy:v1.12.1
+    environment:
+      OBSERVABILITY_BASIC_AUTH_PASSWORD: ${OBSERVABILITY_BASIC_AUTH_PASSWORD}
+      OBSERVABILITY_BASIC_AUTH_USERNAME: ${OBSERVABILITY_BASIC_AUTH_USERNAME}
+      LOKI_URL: ${LOKI_URL}
+      PROMETHEUS_URL: ${PROMETHEUS_URL}
+    command: >
+      run
+      --server.http.listen-addr=0.0.0.0:12345
+      --storage.path=/var/lib/alloy/data
+      /etc/alloy
+    volumes:
+      - ./alloy:/etc/alloy
+      - /var/run/docker.sock:/var/run/docker.sock
+      # - ./.data/alloy:/var/lib/alloy/data
+    networks:
+      - observability
+      - observability-sources
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
