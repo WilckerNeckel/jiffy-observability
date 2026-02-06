@@ -1120,7 +1120,7 @@
     },
     {
       "type": "stat",
-      "title": "Requests per second (rate over dashboard interval)",
+      "title": "Requests per second (last 2 minutes)",
       "id": 452,
       "datasource": {
         "type": "prometheus",
@@ -1134,7 +1134,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_duration_milliseconds_count[$__rate_interval]))",
+          "expr": "sum(rate(http_server_duration_milliseconds_count[2m]))",
           "instant": true,
           "refId": "A"
         }
@@ -1177,7 +1177,7 @@
     },
     {
       "type": "stat",
-      "title": "Error rate % (5xx, dashboard interval)",
+      "title": "Error rate % (5xx, last 5 minutes)",
       "id": 453,
       "datasource": {
         "type": "prometheus",
@@ -1191,7 +1191,7 @@
       },
       "targets": [
         {
-          "expr": "((sum(rate(http_server_duration_milliseconds_count{http_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / clamp_min(sum(rate(http_server_duration_milliseconds_count[$__rate_interval])), 1e-6)) * 100",
+          "expr": "((sum(rate(http_server_duration_milliseconds_count{http_status_code=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_server_duration_milliseconds_count[5m])), 1e-6)) * 100",
           "instant": true,
           "refId": "A"
         }
@@ -1234,7 +1234,7 @@
     },
     {
       "type": "stat",
-      "title": "Latency p95 (ms) (dashboard interval)",
+      "title": "Latency p95 (ms) (last 5 minutes)",
       "id": 454,
       "datasource": {
         "type": "prometheus",
@@ -1248,7 +1248,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_duration_milliseconds_bucket[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_duration_milliseconds_bucket[5m])))",
           "instant": true,
           "refId": "A"
         }
