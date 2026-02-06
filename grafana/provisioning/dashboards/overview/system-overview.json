@@ -926,7 +926,7 @@
   "refresh": "5s",
   "schemaVersion": 42,
   "tags": [
-    "linux"
+    "Overview"
   ],
   "templating": {
     "list": [
@@ -1022,7 +1022,7 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "System Overview",
-  "description": "Visão geral do sistema. Responde a pergunta: 'Como está o estado geral do sistema?'",
+  "description": "Visão geral da infra/sistema. Responde a pergunta: 'Está tudo funcionando agora?'",
   "uid": "system-overview",
   "version": 1
 }

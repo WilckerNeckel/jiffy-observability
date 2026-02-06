@@ -15674,7 +15674,7 @@
     "refresh": "5s",
     "schemaVersion": 42,
     "tags": [
-      "linux"
+      "Infra Linux"
     ],
     "templating": {
       "list": [
@@ -15769,7 +15769,8 @@
     },
     "timepicker": {},
     "timezone": "browser",
-    "title": "Node Exporter Full",
+    "title": "Infra - Host (Node Exporter)",
     "uid": "rYdddlPWk",
-    "version": 1
+    "version": 1,
+    "description": "Métricas do host coletadas pelo Node Exporter. Responde a pergunta 'O meu host está/estava saudável?'"
   }
