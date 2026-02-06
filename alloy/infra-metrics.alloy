@@ -19,10 +19,17 @@ prometheus.relabel "cadvisor" {
     replacement  = "cadvisor"
   }
 
+  // retirado pois estava utilizando o hostname do container e não do host
+  // rule {
+  //   target_label = "instance"
+  //   replacement  = constants.hostname
+  // }
+
   rule {
-    target_label = "instance"
-    replacement  = constants.hostname
+    source_labels = ["__meta_docker_container_node_name"]
+    target_label  = "node"
   }
+
 
   forward_to = [prometheus.remote_write.default.receiver]
 }
@@ -49,9 +56,15 @@ prometheus.relabel "node_exporter" {
     replacement  = "node-exporter"
   }
 
+  // retirado pois estava utilizando o hostname do container e não do host
+  // rule {
+  //   target_label = "instance"
+  //   replacement  = constants.hostname
+  // }
+    
   rule {
-    target_label = "instance"
-    replacement  = constants.hostname
+    source_labels = ["nodename"]
+    target_label  = "node"
   }
 
   forward_to = [prometheus.remote_write.default.receiver]
