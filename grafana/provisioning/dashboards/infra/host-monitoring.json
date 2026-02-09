@@ -15769,7 +15769,7 @@
     },
     "timepicker": {},
     "timezone": "browser",
-    "title": "Infra - Host (Node Exporter)",
+    "title": "Host Monitoring (Node Exporter)",
     "uid": "rYdddlPWk",
     "version": 1,
     "description": "Métricas do host coletadas pelo Node Exporter. Responde a pergunta 'O meu host está/estava saudável?'"
