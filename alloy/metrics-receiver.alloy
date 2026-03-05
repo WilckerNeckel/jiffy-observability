@@ -13,10 +13,10 @@ otelcol.receiver.otlp "from_agents" {
 
 // MÉTRICAS -> Prometheus
 otelcol.exporter.prometheus "to_prom" {
-  forward_to = [prometheus.remote_write.receiver-exporter.receiver]
+  forward_to = [prometheus.remote_write.receiver_exporter.receiver]
 }
 
-prometheus.remote_write "receiver-exporter" {
+prometheus.remote_write "receiver_exporter" {
   endpoint {
     url = sys.env("PROMETHEUS_URL")
 
@@ -29,10 +29,10 @@ prometheus.remote_write "receiver-exporter" {
 
 // LOGS -> Loki
 otelcol.exporter.loki "to_loki" {
-  forward_to = [loki.write.receiver-exporter.receiver]
+  forward_to = [loki.write.receiver_exporter.receiver]
 }
 
-loki.write "receiver-exporter" {
+loki.write "receiver_exporter" {
   endpoint {
     url = sys.env("LOKI_URL")
 
