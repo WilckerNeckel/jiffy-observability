@@ -13,23 +13,33 @@ otelcol.receiver.otlp "from_agents" {
 
 // MÉTRICAS -> Prometheus
 otelcol.exporter.prometheus "to_prom" {
-  forward_to = [prometheus.remote_write.local.receiver]
+  forward_to = [prometheus.remote_write.default.receiver]
 }
 
-prometheus.remote_write "local" {
+prometheus.remote_write "default" {
   endpoint {
-    url = "http://prometheus:9090/api/v1/write"
+    url = sys.env("PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+      password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
+    }
   }
 }
 
 // LOGS -> Loki
 otelcol.exporter.loki "to_loki" {
-  forward_to = [loki.write.local.receiver]
+  forward_to = [loki.write.default.receiver]
 }
 
-loki.write "local" {
+loki.write "default" {
   endpoint {
-    url = "http://loki:3100/loki/api/v1/push"
+    url = sys.env("LOKI_URL")
+    
+      basic_auth {
+      username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+      password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
+    }
   }
 }
 
