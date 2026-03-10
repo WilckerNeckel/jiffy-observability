@@ -33,6 +33,11 @@ discovery.relabel "filter_docker_labels" {
     target_label = "instance"
     replacement  = constants.hostname
   }
+
+  rule {
+    target_label = "environment"
+    replacement  = sys.env("ENVIRONMENT")
+  }
 }
 
 loki.process "create_backend_labels" {
