@@ -11,4 +11,8 @@ sudo chown -R 472:472 ./.data/grafana-data
 mkdir -p ./.data/prometheus-data
 sudo chown -R 65534:65534 ./.data/prometheus-data
 sudo chmod -R 755 ./.data/prometheus-data
+
+mkdir -p ./.data/tempo-data
+sudo chown -R 10001:10001 ./.data/tempo-data
+sudo chmod -R 755 ./.data/tempo-data
 ```

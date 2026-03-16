@@ -14,6 +14,7 @@ ALLOY_FILE      = -f compose/alloy-agent.yml
 CADVISOR_FILE   = -f compose/cadvisor.yml
 PROMETHEUS_FILE = -f compose/prometheus.yml
 LOKI_FILE       = -f compose/loki.yml
+TEMPO_FILE      = -f compose/tempo.yml
 GRAFANA_FILE    = -f compose/grafana.yml
 
 # Conjunto completo de arquivos base (para up-all, ps, down-all, logs)
@@ -23,6 +24,7 @@ ALL_FILES = \
 	$(CADVISOR_FILE) \
 	$(PROMETHEUS_FILE) \
 	$(LOKI_FILE) \
+	$(TEMPO_FILE) \
 	$(GRAFANA_FILE)
 
 # ---------- Optional overrides (per service) ----------
@@ -31,6 +33,7 @@ ALLOY_OVERRIDE      = $(if $(wildcard compose/alloy-agent.override.yml),-f compo
 CADVISOR_OVERRIDE   = $(if $(wildcard compose/cadvisor.override.yml),-f compose/cadvisor.override.yml,)
 PROMETHEUS_OVERRIDE = $(if $(wildcard compose/prometheus.override.yml),-f compose/prometheus.override.yml,)
 LOKI_OVERRIDE       = $(if $(wildcard compose/loki.override.yml),-f compose/loki.override.yml,)
+TEMPO_OVERRIDE      = $(if $(wildcard compose/tempo.override.yml),-f compose/tempo.override.yml,)
 GRAFANA_OVERRIDE    = $(if $(wildcard compose/grafana.override.yml),-f compose/grafana.override.yml,)
 
 # Conjunto completo de overrides (para up-all / observability / backend)
@@ -39,6 +42,7 @@ ALL_OVERRIDES = \
 	$(CADVISOR_OVERRIDE) \
 	$(PROMETHEUS_OVERRIDE) \
 	$(LOKI_OVERRIDE) \
+	$(TEMPO_OVERRIDE) \
 	$(GRAFANA_OVERRIDE)
 
 
@@ -47,10 +51,10 @@ ALL_OVERRIDES = \
 .PHONY: \
 	backend observability \
 	up-all down-all ps logs \
-	alloy cadvisor prometheus loki grafana \
-	log-alloy log-cadvisor log-prometheus log-loki log-grafana \
-	restart-alloy restart-cadvisor restart-prometheus restart-loki restart-grafana \
-	down-alloy down-cadvisor down-prometheus down-loki down-grafana
+	alloy cadvisor prometheus loki tempo grafana \
+	log-alloy log-cadvisor log-prometheus log-loki log-tempo log-grafana \
+	restart-alloy restart-cadvisor restart-prometheus restart-loki restart-tempo restart-grafana \
+	down-alloy down-cadvisor down-prometheus down-loki down-tempo down-grafana
 
 ## Backend server (agent-only)
 ## Alloy + cAdvisor + Node Exporter
@@ -62,12 +66,13 @@ backend:
 		up -d
 
 ## Observability central server
-## Prometheus + Loki + Grafana 
+## Prometheus + Loki + Tempo + Grafana
 observability:
 	$(COMPOSE) \
 		$(BASE) \
 		$(PROMETHEUS_FILE) $(PROMETHEUS_OVERRIDE) \
 		$(LOKI_FILE)       $(LOKI_OVERRIDE) \
+		$(TEMPO_FILE)      $(TEMPO_OVERRIDE) \
 		$(GRAFANA_FILE)    $(GRAFANA_OVERRIDE) \
 		up -d
 
@@ -101,6 +106,9 @@ prometheus:
 loki:
 	$(COMPOSE) $(BASE) $(LOKI_FILE) $(LOKI_OVERRIDE) up -d loki
 
+tempo:
+	$(COMPOSE) $(BASE) $(TEMPO_FILE) $(TEMPO_OVERRIDE) up -d tempo
+
 grafana:
 	$(COMPOSE) $(BASE) $(GRAFANA_FILE) $(GRAFANA_OVERRIDE) up -d grafana
 
@@ -118,6 +126,9 @@ log-prometheus:
 
 log-loki:
 	$(COMPOSE) $(BASE) $(LOKI_FILE) logs -f loki
+
+log-tempo:
+	$(COMPOSE) $(BASE) $(TEMPO_FILE) logs -f tempo
 
 log-grafana:
 	$(COMPOSE) $(BASE) $(GRAFANA_FILE) logs -f grafana
@@ -137,6 +148,9 @@ restart-prometheus:
 restart-loki:
 	$(COMPOSE) $(BASE) $(LOKI_FILE) restart loki
 
+restart-tempo:
+	$(COMPOSE) $(BASE) $(TEMPO_FILE) restart tempo
+
 restart-grafana:
 	$(COMPOSE) $(BASE) $(GRAFANA_FILE) restart grafana
 
@@ -154,6 +168,9 @@ down-prometheus:
 
 down-loki:
 	$(COMPOSE) $(BASE) $(LOKI_FILE) down
+
+down-tempo:
+	$(COMPOSE) $(BASE) $(TEMPO_FILE) down
 
 down-grafana:
 	$(COMPOSE) $(BASE) $(GRAFANA_FILE) down

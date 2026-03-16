@@ -6,7 +6,7 @@ otelcol.receiver.otlp "from_agents" {
   output {
     metrics = [otelcol.exporter.prometheus.to_prom.input]
     logs    = [otelcol.exporter.loki.to_loki.input]
-    // traces  = [otelcol.exporter.otlphttp.tempo.input]  
+    traces  = [otelcol.exporter.otlphttp.tempo.input]
   }
 }
 
@@ -43,9 +43,9 @@ loki.write "receiver_exporter" {
   }
 }
 
-// TRACES -> Tempo (quando quiser)
-// otelcol.exporter.otlphttp "tempo" {
-//   client {
-//     endpoint = "http://tempo:4318"
-//   }
-// }
+// TRACES -> Tempo
+otelcol.exporter.otlphttp "tempo" {
+  client {
+    endpoint = "http://tempo:4318"
+  }
+}
