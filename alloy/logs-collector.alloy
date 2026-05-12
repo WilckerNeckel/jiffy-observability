@@ -1,3 +1,5 @@
+// Arquivo de configuração responsável pela coleta de logs no sistema e envio para o loki
+
 // Discover Docker containers
 discovery.docker "linux" {
   host = "unix:///var/run/docker.sock"

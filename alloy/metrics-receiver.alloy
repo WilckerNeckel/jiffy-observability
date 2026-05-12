@@ -1,3 +1,5 @@
+// Arquivo de configuração responsável por receber as métricas, logs e tracing de uma fonte externa (como um backend em outro servidor) via protocolo OTLP
+// E repassar para os serviços responsáveis (loki, tempo, prometheus)
 otelcol.receiver.otlp "from_agents" {
   http {
     endpoint = "0.0.0.0:4318"
@@ -43,6 +45,7 @@ loki.write "receiver_exporter" {
   }
 }
 
+// tracing já vem em otecol, por isso não precisa de conversão
 // TRACES -> Tempo
 otelcol.exporter.otlphttp "tempo" {
   client {

@@ -5,6 +5,10 @@ datasources:
     uid: tempo
     type: tempo
     access: proxy
-    url: http://tempo:3200
+    url: $GRAFANA_TEMPO_DATASOURCE_URL # default: http://tempo:3200
+    basicAuth: $GRAFANA_BASIC_AUTH_ENABLED # default: false
+    basicAuthUser: $GRAFANA_BASIC_AUTH_USERNAME
+    secureJsonData:
+      basicAuthPassword: $GRAFANA_BASIC_AUTH_PASSWORD
     isDefault: false
     editable: false

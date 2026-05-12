@@ -1,3 +1,6 @@
+// Arquivo de configuração responsável pela coleta de métricas no sistema e envio para prometheus
+
+
 // -------------------------------
 // cAdvisor
 // -------------------------------

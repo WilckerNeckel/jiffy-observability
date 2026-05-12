@@ -4,5 +4,9 @@ datasources:
   - name: Loki
     type: loki
     access: proxy
-    url: http://loki:3100
+    url: $GRAFANA_LOKI_DATASOURCE_URL # default: http://loki:3100
+    basicAuth: $GRAFANA_BASIC_AUTH_ENABLED # default: false
+    basicAuthUser: $GRAFANA_BASIC_AUTH_USERNAME
+    secureJsonData:
+      basicAuthPassword: $GRAFANA_BASIC_AUTH_PASSWORD
     isDefault: true
