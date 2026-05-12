@@ -40,6 +40,11 @@ discovery.relabel "filter_docker_labels" {
     target_label = "environment"
     replacement  = sys.env("ENVIRONMENT")
   }
+
+  rule {
+    target_label = "enviroment"
+    replacement  = sys.env("ENVIROMENT")
+  }
 }
 
 loki.process "create_backend_labels" {
