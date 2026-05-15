@@ -27,9 +27,10 @@ groups:
               editorMode: code
 
               expr: |
-                time() - postgres_basebackup_last_success_timestamp{
-                  environment="BACKEND_PRODUCAO"
-                } > 93600
+                (time() - postgres_basebackup_last_success_timestamp{
+                  environment="BACKEND_PRODUCAO",
+                  mode="local"
+                }) > bool 93600
 
               instant: true
               intervalMs: 1000
@@ -74,8 +75,9 @@ groups:
 
               expr: |
                 postgres_basebackup_last_status{
-                  environment="BACKEND_PRODUCAO"
-                } == 0
+                  environment="BACKEND_PRODUCAO",
+                  mode="local"
+                } == bool 0
 
               instant: true
               intervalMs: 1000
