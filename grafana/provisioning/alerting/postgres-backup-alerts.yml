@@ -1,0 +1,98 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: postgres-backup
+    folder: Infrastructure
+    interval: 1m
+
+    rules:
+      - uid: postgres_backup_backend_producao
+        title: PostgreSQL Backup Produção Atrasado
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                time() - postgres_basebackup_last_success_timestamp{
+                  environment="BACKEND_PRODUCAO"
+                } > 93600
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 5m
+
+        annotations:
+          summary: Backup PostgreSQL de produção atrasado
+          description: |
+            O último backup PostgreSQL do ambiente BACKEND_PRODUCAO
+            ocorreu há mais de 26 horas.
+
+        labels:
+          severity: critical
+          service: postgres-backup
+          environment: BACKEND_PRODUCAO
+    
+
+      - uid: postgres_backup_backend_producao_failed
+        title: PostgreSQL Backup Produção Falhou
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                postgres_basebackup_last_status{
+                  environment="BACKEND_PRODUCAO"
+                } == 0
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 2m
+
+        annotations:
+          summary: Último backup PostgreSQL falhou
+          description: |
+            O último backup PostgreSQL do ambiente BACKEND_PRODUCAO falhou.
+
+        labels:
+          severity: critical
+          service: postgres-backup
+          environment: BACKEND_PRODUCAO
