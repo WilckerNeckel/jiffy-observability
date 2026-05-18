@@ -98,3 +98,142 @@ groups:
           severity: critical
           service: postgres-backup
           environment: BACKEND_PRODUCAO
+
+      - uid: postgres_wal_archive_backend_producao_stale
+        title: PostgreSQL WAL Archive Produção Atrasado
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                (time() - postgres_wal_archive_last_success_timestamp{
+                  environment="BACKEND_PRODUCAO",
+                  archive="wal-g"
+                }) > bool 600
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 5m
+
+        annotations:
+          summary: WAL archive PostgreSQL de produção atrasado
+          description: |
+            Nenhum WAL foi arquivado com sucesso no ambiente BACKEND_PRODUCAO
+            há mais de 10 minutos. O PITR pode estar comprometido.
+
+        labels:
+          severity: critical
+          service: postgres-wal-archive
+          environment: BACKEND_PRODUCAO
+
+
+      - uid: postgres_wal_archive_backend_producao_failed
+        title: PostgreSQL WAL Archive Produção Falhou
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                postgres_wal_archive_last_status{
+                  environment="BACKEND_PRODUCAO",
+                  archive="wal-g"
+                } == bool 0
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 2m
+
+        annotations:
+          summary: Último WAL archive PostgreSQL falhou
+          description: |
+            A última tentativa de arquivamento WAL do ambiente BACKEND_PRODUCAO falhou.
+
+        labels:
+          severity: critical
+          service: postgres-wal-archive
+          environment: BACKEND_PRODUCAO
+
+
+      - uid: postgres_wal_archive_backend_producao_recent_failures
+        title: PostgreSQL WAL Archive Produção com Falhas Recentes
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                increase(postgres_wal_archive_push_failure_total{
+                  environment="BACKEND_PRODUCAO",
+                  archive="wal-g"
+                }[30m]) > bool 0
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 1m
+
+        annotations:
+          summary: Falhas recentes no WAL archive PostgreSQL
+          description: |
+            Houve uma ou mais falhas de arquivamento WAL nos últimos 30 minutos
+            no ambiente BACKEND_PRODUCAO.
+
+        labels:
+          severity: warning
+          service: postgres-wal-archive
+          environment: BACKEND_PRODUCAO
