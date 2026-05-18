@@ -99,7 +99,7 @@ groups:
           service: postgres-backup
           environment: BACKEND_PRODUCAO
 
-      - uid: postgres_wal_archive_backend_producao_stale
+      - uid: pg_wal_archive_prod_stale
         title: PostgreSQL WAL Archive Produção Atrasado
         condition: A
 
