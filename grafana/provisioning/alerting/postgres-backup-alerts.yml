@@ -7,7 +7,7 @@ groups:
     interval: 1m
 
     rules:
-      - uid: pg_wal_archive_prod_stale
+      - uid: postgres_backup_backend_producao
         title: PostgreSQL Backup Produção Atrasado
         condition: A
 
