@@ -7,7 +7,7 @@ groups:
     interval: 1m
 
     rules:
-      - uid: postgres_backup_backend_producao
+      - uid: pg_wal_archive_prod_stale
         title: PostgreSQL Backup Produção Atrasado
         condition: A
 
@@ -146,7 +146,7 @@ groups:
           environment: BACKEND_PRODUCAO
 
 
-      - uid: postgres_wal_archive_backend_producao_failed
+      - uid: pg_wal_archive_prod_failed
         title: PostgreSQL WAL Archive Produção Falhou
         condition: A
 
@@ -192,7 +192,7 @@ groups:
           environment: BACKEND_PRODUCAO
 
 
-      - uid: postgres_wal_archive_backend_producao_recent_failures
+      - uid: pg_wal_archive_prod_recent_fail
         title: PostgreSQL WAL Archive Produção com Falhas Recentes
         condition: A
 
