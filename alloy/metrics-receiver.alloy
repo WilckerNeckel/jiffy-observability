@@ -70,8 +70,6 @@ otelcol.exporter.otlphttp "tempo" {
 }
 
 otelcol.auth.basic "observability_auth" {
-  client_auth {
-    username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
-    password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
-  }
+  username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+  password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
 }
