@@ -22,6 +22,11 @@ prometheus.relabel "cadvisor" {
     replacement  = "cadvisor"
   }
 
+  rule {
+    target_label = "server"
+    replacement  = sys.env("HOST_SERVER_NAME")
+  }
+
   // retirado pois estava utilizando o hostname do container e não do host
   // rule {
   //   target_label = "instance"
@@ -57,6 +62,11 @@ prometheus.relabel "node_exporter" {
   rule {
     target_label = "job"
     replacement  = "node-exporter"
+  }
+
+  rule {
+    target_label = "server"
+    replacement  = sys.env("HOST_SERVER_NAME")
   }
 
   // retirado pois estava utilizando o hostname do container e não do host
