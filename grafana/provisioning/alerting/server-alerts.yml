@@ -1,0 +1,130 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: server
+    folder: Infrastructure
+    interval: 1m
+
+    rules:
+      - uid: server_disk_usage_warning
+        title: Disco do servidor acima de 80%
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                (
+                  100 *
+                  (
+                    1 -
+                    (
+                      node_filesystem_avail_bytes{
+                        server!="",
+                        fstype!~"tmpfs|devtmpfs|overlay|squashfs",
+                        mountpoint!~"/run.*|/var/lib/docker/.*"
+                      }
+                      /
+                      node_filesystem_size_bytes{
+                        server!="",
+                        fstype!~"tmpfs|devtmpfs|overlay|squashfs",
+                        mountpoint!~"/run.*|/var/lib/docker/.*"
+                      }
+                    )
+                  )
+                ) > bool 80
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 10m
+
+        annotations:
+          summary: Disco do servidor acima de 80%
+          description: |
+            O filesystem {{ $labels.mountpoint }} do servidor {{ $labels.server }}
+            está com mais de 80% de uso há mais de 10 minutos.
+
+        labels:
+          severity: warning
+          service: server
+          component: disk
+
+      - uid: server_disk_usage_critical
+        title: Disco do servidor acima de 90%
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                (
+                  100 *
+                  (
+                    1 -
+                    (
+                      node_filesystem_avail_bytes{
+                        server!="",
+                        fstype!~"tmpfs|devtmpfs|overlay|squashfs",
+                        mountpoint!~"/run.*|/var/lib/docker/.*"
+                      }
+                      /
+                      node_filesystem_size_bytes{
+                        server!="",
+                        fstype!~"tmpfs|devtmpfs|overlay|squashfs",
+                        mountpoint!~"/run.*|/var/lib/docker/.*"
+                      }
+                    )
+                  )
+                ) > bool 90
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 5m
+
+        annotations:
+          summary: Disco do servidor acima de 90%
+          description: |
+            O filesystem {{ $labels.mountpoint }} do servidor {{ $labels.server }}
+            está com mais de 90% de uso há mais de 5 minutos.
+
+        labels:
+          severity: critical
+          service: server
+          component: disk
