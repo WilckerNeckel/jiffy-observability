@@ -128,3 +128,168 @@ groups:
           severity: critical
           service: server
           component: disk
+
+      - uid: server_memory_usage_warning
+        title: Memória RAM acima de 80%
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                (
+                  100 *
+                  (
+                    1 -
+                    (
+                      node_memory_MemAvailable_bytes{
+                        server!=""
+                      }
+                      /
+                      node_memory_MemTotal_bytes{
+                        server!=""
+                      }
+                    )
+                  )
+                ) > bool 80
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 10m
+
+        annotations:
+          summary: Memória RAM acima de 80%
+          description: |
+            O servidor {{ $labels.server }}
+            está com uso de memória RAM acima de 80%
+            há mais de 10 minutos.
+
+        labels:
+          severity: warning
+          service: server
+          component: memory
+
+
+      - uid: server_memory_usage_critical
+        title: Memória RAM acima de 90%
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                (
+                  100 *
+                  (
+                    1 -
+                    (
+                      node_memory_MemAvailable_bytes{
+                        server!=""
+                      }
+                      /
+                      node_memory_MemTotal_bytes{
+                        server!=""
+                      }
+                    )
+                  )
+                ) > bool 90
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 5m
+
+        annotations:
+          summary: Memória RAM acima de 90%
+          description: |
+            O servidor {{ $labels.server }}
+            está com uso de memória RAM acima de 90%
+            há mais de 5 minutos.
+
+        labels:
+          severity: critical
+          service: server
+          component: memory
+
+
+      - uid: server_oom_killer_detected
+        title: OOM Killer detectado no servidor
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                increase(
+                  node_vmstat_oom_kill{
+                    server!=""
+                  }[5m]
+                ) > bool 0
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: OK
+        execErrState: Alerting
+
+        for: 0m
+
+        annotations:
+          summary: OOM Killer detectado
+          description: |
+            O kernel executou OOM Killer no servidor
+            {{ $labels.server }} nos últimos 5 minutos.
+
+        labels:
+          severity: critical
+          service: server
+          component: memory
