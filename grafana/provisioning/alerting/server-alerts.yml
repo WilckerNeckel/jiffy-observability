@@ -562,3 +562,98 @@ groups:
           severity: warning
           service: server
           component: cpu
+
+      - uid: server_down
+        title: Servidor offline
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                up{
+                  job="node-exporter",
+                  server!=""
+                } == bool 0
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 2m
+
+        annotations:
+          summary: Servidor offline
+          description: |
+            O servidor {{ $labels.server }}
+            está offline ou o node exporter
+            não responde há mais de 2 minutos.
+
+        labels:
+          severity: critical
+          service: server
+          component: host
+
+
+      - uid: server_reboot_detected
+        title: Reboot detectado no servidor
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 900
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                changes(
+                  node_boot_time_seconds{
+                    server!=""
+                  }[15m]
+                ) > bool 0
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: OK
+        execErrState: Alerting
+
+        for: 0m
+
+        annotations:
+          summary: Reboot detectado
+          description: |
+            O servidor {{ $labels.server }}
+            foi reiniciado nos últimos 15 minutos.
+
+        labels:
+          severity: warning
+          service: server
+          component: host
