@@ -293,3 +293,272 @@ groups:
           severity: critical
           service: server
           component: memory
+
+      - uid: server_cpu_usage_warning
+        title: CPU do servidor acima de 80%
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                100 - (
+                  avg by(server)(
+                    rate(node_cpu_seconds_total{
+                      mode="idle",
+                      server!=""
+                    }[5m])
+                  ) * 100
+                ) > bool 80
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 10m
+
+        annotations:
+          summary: CPU acima de 80%
+          description: |
+            O servidor {{ $labels.server }}
+            está com uso de CPU acima de 80%
+            há mais de 10 minutos.
+
+        labels:
+          severity: warning
+          service: server
+          component: cpu
+
+
+      - uid: server_cpu_usage_critical
+        title: CPU do servidor acima de 95%
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                100 - (
+                  avg by(server)(
+                    rate(node_cpu_seconds_total{
+                      mode="idle",
+                      server!=""
+                    }[5m])
+                  ) * 100
+                ) > bool 95
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 5m
+
+        annotations:
+          summary: CPU acima de 95%
+          description: |
+            O servidor {{ $labels.server }}
+            está com uso de CPU acima de 95%
+            há mais de 5 minutos.
+
+        labels:
+          severity: critical
+          service: server
+          component: cpu
+
+
+      - uid: server_load_average_warning
+        title: Load average alto no servidor
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                (
+                  node_load5{
+                    server!=""
+                  }
+                  /
+                  count by(server)(
+                    count by(server, cpu)(
+                      node_cpu_seconds_total{
+                        mode="idle",
+                        server!=""
+                      }
+                    )
+                  )
+                ) > bool 1.5
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 10m
+
+        annotations:
+          summary: Load average alto
+          description: |
+            O servidor {{ $labels.server }}
+            está com load average acima de 1.5 por core
+            há mais de 10 minutos.
+
+        labels:
+          severity: warning
+          service: server
+          component: cpu
+
+
+      - uid: server_load_average_critical
+        title: Load average crítico no servidor
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                (
+                  node_load5{
+                    server!=""
+                  }
+                  /
+                  count by(server)(
+                    count by(server, cpu)(
+                      node_cpu_seconds_total{
+                        mode="idle",
+                        server!=""
+                      }
+                    )
+                  )
+                ) > bool 2
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 5m
+
+        annotations:
+          summary: Load average crítico
+          description: |
+            O servidor {{ $labels.server }}
+            está com load average acima de 2 por core
+            há mais de 5 minutos.
+
+        labels:
+          severity: critical
+          service: server
+          component: cpu
+
+
+      - uid: server_iowait_warning
+        title: IO Wait alto no servidor
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                avg by(server)(
+                  rate(node_cpu_seconds_total{
+                    mode="iowait",
+                    server!=""
+                  }[5m])
+                ) * 100 > bool 20
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 10m
+
+        annotations:
+          summary: IO Wait alto
+          description: |
+            O servidor {{ $labels.server }}
+            está com IO Wait acima de 20%
+            há mais de 10 minutos.
+
+        labels:
+          severity: warning
+          service: server
+          component: cpu
