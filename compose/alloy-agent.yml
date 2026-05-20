@@ -13,7 +13,7 @@ services:
             run
             --server.http.listen-addr=0.0.0.0:12345
             --storage.path=/var/lib/alloy/data
-            /etc/alloy
+            /etc/alloy/profiles/${ALLOY_PROFILE:-full}
         volumes:
             - ./alloy:/etc/alloy
             - /var/run/docker.sock:/var/run/docker.sock

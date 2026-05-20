@@ -1,0 +1,98 @@
+// Arquivo de configuração responsável pela coleta de métricas no sistema e envio para prometheus
+
+
+// -------------------------------
+// cAdvisor
+// -------------------------------
+prometheus.scrape "cadvisor" {
+  targets = [
+    {
+      __address__ = "cadvisor:8080",
+    },
+  ]
+
+  scrape_interval = "15s"
+
+  forward_to = [prometheus.relabel.cadvisor.receiver]
+}
+
+prometheus.relabel "cadvisor" {
+  rule {
+    target_label = "job"
+    replacement  = "cadvisor"
+  }
+
+  rule {
+    target_label = "server"
+    replacement  = sys.env("HOST_SERVER_NAME")
+  }
+
+  // retirado pois estava utilizando o hostname do container e não do host
+  // rule {
+  //   target_label = "instance"
+  //   replacement  = constants.hostname
+  // }
+
+  rule {
+    source_labels = ["__meta_docker_container_node_name"]
+    target_label  = "node"
+  }
+
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// -------------------------------
+// Node Exporter (bare metal)
+// -------------------------------
+
+prometheus.scrape "node_exporter" {
+  targets = [
+    {
+      __address__ = "host.docker.internal:9100",
+    },
+  ]
+
+  scrape_interval = "15s"
+
+  forward_to = [prometheus.relabel.node_exporter.receiver]
+}
+
+prometheus.relabel "node_exporter" {
+  rule {
+    target_label = "job"
+    replacement  = "node-exporter"
+  }
+
+  rule {
+    target_label = "server"
+    replacement  = sys.env("HOST_SERVER_NAME")
+  }
+
+  // retirado pois estava utilizando o hostname do container e não do host
+  // rule {
+  //   target_label = "instance"
+  //   replacement  = constants.hostname
+  // }
+    
+  rule {
+    source_labels = ["nodename"]
+    target_label  = "node"
+  }
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// -------------------------------
+// Export to Prometheus
+// -------------------------------
+prometheus.remote_write "default" {
+  endpoint {
+    url = sys.env("PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+      password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
+    }
+  }
+}

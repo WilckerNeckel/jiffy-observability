@@ -51,7 +51,7 @@ ALL_OVERRIDES = \
 .PHONY: \
 	backend observability \
 	up-all down-all ps logs \
-	alloy cadvisor prometheus loki tempo grafana \
+	alloy alloy-full alloy-logs alloy-metrics alloy-otlp-gateway alloy-logs-metrics cadvisor prometheus loki tempo grafana \
 	log-alloy log-cadvisor log-prometheus log-loki log-tempo log-grafana \
 	restart-alloy restart-cadvisor restart-prometheus restart-loki restart-tempo restart-grafana \
 	down-alloy down-cadvisor down-prometheus down-loki down-tempo down-grafana
@@ -94,8 +94,23 @@ logs:
 
 # ---------- Single services (UP) ----------
 
-alloy:
-	$(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
+# alloy:
+# 	$(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
+
+alloy-full:
+	ALLOY_PROFILE=full $(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
+
+alloy-logs:
+	ALLOY_PROFILE=logs $(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
+
+alloy-metrics:
+	ALLOY_PROFILE=metrics $(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
+
+alloy-otlp-gateway:
+	ALLOY_PROFILE=otlp-gateway $(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
+
+alloy-logs-metrics:
+	ALLOY_PROFILE=logs-metrics $(COMPOSE) $(BASE) $(ALLOY_FILE) $(ALLOY_OVERRIDE) up -d alloy
 
 cadvisor:
 	$(COMPOSE) $(BASE) $(CADVISOR_FILE) $(CADVISOR_OVERRIDE) up -d cadvisor

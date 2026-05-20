@@ -1,0 +1,75 @@
+// Fluxo atual da observabilidade:
+//
+// O backend envia métricas, logs e traces no formato OTLP para o Alloy,
+// que está executando no mesmo servidor da aplicação.
+//
+// O Alloy atua como um gateway/roteador de telemetria:
+// ele recebe todos os dados em OTLP e encaminha cada tipo
+// para o serviço correspondente.
+//
+// Conversões realizadas:
+// - Métricas  -> convertidas para Prometheus Remote Write
+// - Logs      -> convertidos para o formato esperado pelo Loki
+// - Traces    -> enviados diretamente para o Tempo, pois já utilizam OTLP
+//
+// Dessa forma, o backend precisa se comunicar apenas com o Alloy,
+// centralizando toda a lógica de exportação e roteamento da observabilidade.
+otelcol.receiver.otlp "from_agents" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    metrics = [otelcol.exporter.prometheus.to_prom.input]
+    logs    = [otelcol.exporter.loki.to_loki.input]
+    traces  = [otelcol.exporter.otlphttp.tempo.input]
+  }
+}
+
+
+// MÉTRICAS -> Prometheus
+otelcol.exporter.prometheus "to_prom" {
+  forward_to = [prometheus.remote_write.receiver_exporter.receiver]
+}
+
+prometheus.remote_write "receiver_exporter" {
+  endpoint {
+    url = sys.env("PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+      password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
+    }
+  }
+}
+
+// LOGS -> Loki
+otelcol.exporter.loki "to_loki" {
+  forward_to = [loki.write.receiver_exporter.receiver]
+}
+
+loki.write "receiver_exporter" {
+  endpoint {
+    url = sys.env("LOKI_URL")
+
+      basic_auth {
+      username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+      password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
+    }
+  }
+}
+
+// tracing já vem em otecol, por isso não precisa de conversão
+// TRACES -> Tempo
+otelcol.exporter.otlphttp "tempo" {
+  client {
+    endpoint = sys.env("TEMPO_INGEST_OTLP")
+
+    auth = otelcol.auth.basic.observability_auth.handler
+  }
+}
+
+otelcol.auth.basic "observability_auth" {
+  username = sys.env("OBSERVABILITY_BASIC_AUTH_USERNAME")
+  password = sys.env("OBSERVABILITY_BASIC_AUTH_PASSWORD")
+}
