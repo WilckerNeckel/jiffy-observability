@@ -1,14 +1,14 @@
 apiVersion: 1
 
 datasources:
-  - name: Tempo
-    uid: tempo
-    type: tempo
-    access: proxy
-    url: $GRAFANA_TEMPO_DATASOURCE_URL # default: http://tempo:3200
-    basicAuth: $GRAFANA_BASIC_AUTH_ENABLED # default: false
-    basicAuthUser: $GRAFANA_BASIC_AUTH_USERNAME
-    secureJsonData:
-      basicAuthPassword: $GRAFANA_BASIC_AUTH_PASSWORD
-    isDefault: false
-    editable: false
+    - name: Tempo
+      uid: tempo
+      type: tempo
+      access: proxy
+      url: $TEMPO_QUERY_API # default: http://tempo:3200
+      basicAuth: $GRAFANA_BASIC_AUTH_ENABLED # default: false
+      basicAuthUser: $GRAFANA_BASIC_AUTH_USERNAME
+      secureJsonData:
+          basicAuthPassword: $GRAFANA_BASIC_AUTH_PASSWORD
+      isDefault: false
+      editable: false

@@ -63,7 +63,7 @@ loki.write "receiver_exporter" {
 // TRACES -> Tempo
 otelcol.exporter.otlphttp "tempo" {
   client {
-    endpoint = sys.env("TEMPO_URL")
+    endpoint = sys.env("TEMPO_INGEST_OTLP")
 
     auth = otelcol.auth.basic.observability_auth.handler
   }
