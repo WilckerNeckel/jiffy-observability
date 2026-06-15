@@ -428,7 +428,7 @@ groups:
                     )
                   )
                 )
-                > 1.5
+                > bool 1.5
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200
@@ -482,7 +482,7 @@ groups:
                     )
                   )
                 )
-                > 2
+                > bool 2
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200
