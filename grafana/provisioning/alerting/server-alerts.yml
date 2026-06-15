@@ -419,20 +419,16 @@ groups:
 
               expr: |
                 (
-                  node_load5{
-                    server!=""
-                  }
+                  node_load5{server!=""}
                   /
+                  on(server) group_left
                   count by(server)(
                     count by(server, cpu)(
-                      node_cpu_seconds_total{
-                        mode="idle",
-                        server!=""
-                      }
+                      node_cpu_seconds_total{mode="idle", server!=""}
                     )
                   )
-                ) > bool 1.5
-
+                )
+                > 1.5
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200
@@ -477,20 +473,16 @@ groups:
 
               expr: |
                 (
-                  node_load5{
-                    server!=""
-                  }
+                  node_load5{server!=""}
                   /
+                  on(server) group_left
                   count by(server)(
                     count by(server, cpu)(
-                      node_cpu_seconds_total{
-                        mode="idle",
-                        server!=""
-                      }
+                      node_cpu_seconds_total{mode="idle", server!=""}
                     )
                   )
-                ) > bool 2
-
+                )
+                > 2
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200

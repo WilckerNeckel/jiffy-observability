@@ -549,7 +549,7 @@
           "step": 240
         }
       ],
-      "title": "Sys Load",
+      "title": "Load average",
       "type": "gauge"
     },
     {
