@@ -1,0 +1,66 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: containers
+    folder: Infrastructure
+    interval: 1m
+
+    rules:
+      - uid: container_disappeared
+        title: Container desapareceu
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 21600
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                max_over_time(
+                  container_last_seen{
+                    job="cadvisor",
+                    server!="",
+                    image!=""
+                  }[6h:]
+                )
+                unless on(server, name)
+                container_last_seen{
+                  job="cadvisor",
+                  server!="",
+                  image!=""
+                }
+                and on(server)
+                (up{job="cadvisor", server!=""} == 1)
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: OK
+        execErrState: Alerting
+
+        for: 4m
+
+        annotations:
+          summary: Container {{ $labels.name }} desapareceu
+          description: |
+            O container {{ $labels.name }} no servidor {{ $labels.server }}
+            estava ativo nas últimas 6 horas mas não está mais sendo reportado
+            pelo cAdvisor há mais de 4 minutos.
+
+        labels:
+          severity: critical
+          service: docker
+          component: container
