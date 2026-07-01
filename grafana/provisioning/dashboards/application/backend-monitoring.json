@@ -1121,7 +1121,7 @@
         {
           "datasource": { "type": "loki", "uid": "${ds_loki}" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level >= 50 [$__range]))",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\"} |~ \"(?i)(\\\"level\\\":(5[0-9]|6[0-9])|\\\"level\\\":\\\"(error|fatal|warn)\\\")\" [$__range]))",
           "queryType": "instant",
           "refId": "A"
         }
@@ -1158,7 +1158,7 @@
         {
           "datasource": { "type": "loki", "uid": "${ds_loki}" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"}[$__range]))",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\"}[$__range]))",
           "queryType": "instant",
           "refId": "A"
         }
@@ -1213,7 +1213,7 @@
         {
           "datasource": { "type": "loki", "uid": "${ds_loki}" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level = 30 [$__auto]))",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\"} |~ \"\\\"level\\\":30\" [$__auto]))",
           "legendFormat": "info",
           "queryType": "range",
           "refId": "A"
@@ -1221,7 +1221,7 @@
         {
           "datasource": { "type": "loki", "uid": "${ds_loki}" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level = 40 [$__auto]))",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\"} |~ \"\\\"level\\\":40\" [$__auto]))",
           "legendFormat": "warn",
           "queryType": "range",
           "refId": "B"
@@ -1229,7 +1229,7 @@
         {
           "datasource": { "type": "loki", "uid": "${ds_loki}" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level >= 50 [$__auto]))",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\"} |~ \"(?i)(\\\"level\\\":(5[0-9]|6[0-9])|\\\"level\\\":\\\"(error|fatal)\\\")\" [$__auto]))",
           "legendFormat": "error+",
           "queryType": "range",
           "refId": "C"
@@ -1257,7 +1257,7 @@
         {
           "datasource": { "type": "loki", "uid": "${ds_loki}" },
           "editorMode": "code",
-          "expr": "{container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level >= 40",
+          "expr": "{container_name=~\".*jiffy-backend.*\"} |~ \"(?i)(error|warn|fatal|exception)\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1284,7 +1284,7 @@
         {
           "datasource": { "type": "loki", "uid": "${ds_loki}" },
           "editorMode": "code",
-          "expr": "{container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | event=~\".+\"",
+          "expr": "{container_name=~\".*jiffy-backend.*\"} | json | event != \"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1309,8 +1309,8 @@
         {
           "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
           "limit": 25,
-          "query": "{ resource.service.name = \"jiffy-backend\" && duration > 2s }",
-          "queryType": "traceql",
+          "query": "{ .service.name = \"jiffy-backend\" && duration > 2s }",
+          "queryType": "traceqlSearch",
           "refId": "A",
           "tableType": "traces"
         }
@@ -1327,8 +1327,8 @@
         {
           "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
           "limit": 25,
-          "query": "{ resource.service.name = \"jiffy-backend\" && status = error }",
-          "queryType": "traceql",
+          "query": "{ .service.name = \"jiffy-backend\" && status = error }",
+          "queryType": "traceqlSearch",
           "refId": "A",
           "tableType": "traces"
         }
@@ -1345,8 +1345,8 @@
         {
           "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
           "limit": 30,
-          "query": "{ resource.service.name = \"jiffy-backend\" }",
-          "queryType": "traceql",
+          "query": "{ .service.name = \"jiffy-backend\" }",
+          "queryType": "traceqlSearch",
           "refId": "A",
           "tableType": "traces"
         }
@@ -1428,24 +1428,6 @@
         "refresh": 1,
         "regex": "",
         "type": "datasource"
-      },
-      {
-        "current": { "selected": true, "text": "All", "value": "$__all" },
-        "datasource": { "type": "loki", "uid": "${ds_loki}" },
-        "definition": "label_values({container_name=~\".*jiffy-backend.*\"}, environment)",
-        "includeAll": true,
-        "label": "Environment",
-        "multi": true,
-        "name": "environment",
-        "options": [],
-        "query": {
-          "query": "label_values({container_name=~\".*jiffy-backend.*\"}, environment)",
-          "refId": "Loki-environment-Variable-Query"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
       }
     ]
   },
@@ -1454,5 +1436,5 @@
   "timezone": "browser",
   "title": "Backend Monitoring",
   "uid": "backend-monitoring",
-  "version": 3
+  "version": 4
 }
