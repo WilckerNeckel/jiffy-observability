@@ -10,5 +10,13 @@ datasources:
       basicAuthUser: $GRAFANA_BASIC_AUTH_USERNAME
       secureJsonData:
           basicAuthPassword: $GRAFANA_BASIC_AUTH_PASSWORD
+      jsonData:
+          tracesToLogs:
+              datasourceUid: loki
+              filterByTraceID: true
+              spanStartTimeShift: "-1h"
+              spanEndTimeShift: "1h"
+          lokiSearch:
+              datasourceUid: loki
       isDefault: false
       editable: false

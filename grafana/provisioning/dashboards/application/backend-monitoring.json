@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Monitoramento HTTP do backend jiffy-backend — tráfego, erros, latência e drill-down por rota.",
+  "description": "Monitoramento HTTP do backend jiffy-backend — métricas, logs (Loki) e traces (Tempo) para investigação.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -1079,6 +1079,280 @@
         }
       ],
       "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 100 },
+      "id": 600,
+      "panels": [],
+      "title": "Logs (Loki)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${ds_loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 101 },
+      "id": 601,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${ds_loki}" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level >= 50 [$__range]))",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Logs de erro (período)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${ds_loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": 0 }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 101 },
+      "id": 602,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${ds_loki}" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"}[$__range]))",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "title": "Total de logs (período)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${ds_loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "stacking": { "group": "A", "mode": "normal" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "error+" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "warn" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "info" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 101 },
+      "id": 603,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${ds_loki}" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level = 30 [$__auto]))",
+          "legendFormat": "info",
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "loki", "uid": "${ds_loki}" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level = 40 [$__auto]))",
+          "legendFormat": "warn",
+          "queryType": "range",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "loki", "uid": "${ds_loki}" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level >= 50 [$__auto]))",
+          "legendFormat": "error+",
+          "queryType": "range",
+          "refId": "C"
+        }
+      ],
+      "title": "Volume de logs por nível",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${ds_loki}" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 109 },
+      "id": 604,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": true,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${ds_loki}" },
+          "editorMode": "code",
+          "expr": "{container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | level >= 40",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Logs warn / error / fatal",
+      "type": "logs"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${ds_loki}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 119 },
+      "id": 605,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": true,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${ds_loki}" },
+          "editorMode": "code",
+          "expr": "{container_name=~\".*jiffy-backend.*\", environment=~\"$environment\"} | json | event=~\".+\"",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Logs com evento de negócio (event label)",
+      "type": "logs"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 127 },
+      "id": 700,
+      "panels": [],
+      "title": "Traces (Tempo)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 128 },
+      "id": 701,
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
+          "limit": 25,
+          "query": "{ resource.service.name = \"jiffy-backend\" && duration > 2s }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Traces lentos (> 2s)",
+      "type": "traces"
+    },
+    {
+      "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 128 },
+      "id": 702,
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
+          "limit": 25,
+          "query": "{ resource.service.name = \"jiffy-backend\" && status = error }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Traces com erro",
+      "type": "traces"
+    },
+    {
+      "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 138 },
+      "id": 703,
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "${ds_tempo}" },
+          "limit": 30,
+          "query": "{ resource.service.name = \"jiffy-backend\" }",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Traces recentes",
+      "type": "traces"
     }
   ],
   "preload": false,
@@ -1132,6 +1406,46 @@
         "regex": "",
         "sort": 1,
         "type": "query"
+      },
+      {
+        "current": { "text": "Loki", "value": "Loki" },
+        "includeAll": false,
+        "label": "Loki",
+        "name": "ds_loki",
+        "options": [],
+        "query": "loki",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": { "text": "Tempo", "value": "tempo" },
+        "includeAll": false,
+        "label": "Tempo",
+        "name": "ds_tempo",
+        "options": [],
+        "query": "tempo",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "loki", "uid": "${ds_loki}" },
+        "definition": "label_values({container_name=~\".*jiffy-backend.*\"}, environment)",
+        "includeAll": true,
+        "label": "Environment",
+        "multi": true,
+        "name": "environment",
+        "options": [],
+        "query": {
+          "query": "label_values({container_name=~\".*jiffy-backend.*\"}, environment)",
+          "refId": "Loki-environment-Variable-Query"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
       }
     ]
   },
@@ -1140,5 +1454,5 @@
   "timezone": "browser",
   "title": "Backend Monitoring",
   "uid": "backend-monitoring",
-  "version": 2
+  "version": 3
 }
