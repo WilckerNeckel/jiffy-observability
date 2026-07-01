@@ -64,3 +64,99 @@ groups:
           severity: critical
           service: docker
           component: container
+
+      - uid: container_crash_loop
+        title: Container em crash loop
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                changes(
+                  container_start_time_seconds{
+                    job="cadvisor",
+                    server!="",
+                    image!=""
+                  }[30m]
+                ) > bool 2
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: OK
+        execErrState: Alerting
+
+        for: 2m
+
+        annotations:
+          summary: Container {{ $labels.name }} em crash loop
+          description: |
+            O container {{ $labels.name }} no servidor {{ $labels.server }}
+            reiniciou mais de 2 vezes nos últimos 30 minutos.
+
+        labels:
+          severity: warning
+          service: docker
+          component: container
+
+      - uid: cadvisor_down
+        title: cAdvisor offline
+        condition: A
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+
+            datasourceUid: prometheus
+
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+
+              editorMode: code
+
+              expr: |
+                up{
+                  job="cadvisor",
+                  server!=""
+                } == bool 0
+
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+
+        noDataState: Alerting
+        execErrState: Alerting
+
+        for: 2m
+
+        annotations:
+          summary: cAdvisor offline
+          description: |
+            O cAdvisor no servidor {{ $labels.server }}
+            está offline ou não responde há mais de 2 minutos.
+            Métricas de containers podem estar indisponíveis.
+
+        labels:
+          severity: critical
+          service: docker
+          component: cadvisor
