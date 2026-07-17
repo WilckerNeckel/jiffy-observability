@@ -31,14 +31,16 @@ groups:
                   container_last_seen{
                     job="cadvisor",
                     server!="",
-                    image!=""
+                    image!="",
+                    name!~".*backup.*"
                   }[6h:]
                 )
                 unless on(server, name)
                 container_last_seen{
                   job="cadvisor",
                   server!="",
-                  image!=""
+                  image!="",
+                  name!~".*backup.*"
                 }
                 and on(server)
                 (up{job="cadvisor", server!=""} == 1)
