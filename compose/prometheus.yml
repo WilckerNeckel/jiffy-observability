@@ -7,6 +7,9 @@ services:
       - --storage.tsdb.retention.time=15d
       # - --enable-feature=remote-write-receiver
       - --web.enable-remote-write-receiver
+      # OTLP nativo para métricas de app (Alloy otelcol.exporter.otlphttp).
+      # Evita otelcol.exporter.prometheus + remote_write, que inflava rate()/increase().
+      - --web.enable-otlp-receiver
       - --web.enable-lifecycle
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
