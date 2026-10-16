@@ -6,6 +6,7 @@ networks:
 services:
   loki:
     image: grafana/loki:2.9.17
+    restart: unless-stopped
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
       - ./.data/loki-data:/var/loki
@@ -41,6 +42,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v3.9.1
+    restart: unless-stopped
     container_name: prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
@@ -63,6 +65,7 @@ services:
 
   grafana:
     image: grafana/grafana:12.3.1
+    restart: unless-stopped
     environment:
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
@@ -92,6 +95,7 @@ services:
 
   alloy:
     image: grafana/alloy:v1.12.1
+    restart: unless-stopped
     command: >
       run
       --server.http.listen-addr=0.0.0.0:12345

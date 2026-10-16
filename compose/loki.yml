@@ -1,6 +1,7 @@
 services:
   loki:
     image: grafana/loki:2.9.17
+    restart: unless-stopped
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
       - ./.data/loki-data:/var/loki

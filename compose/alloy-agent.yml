@@ -1,6 +1,7 @@
 services:
     alloy:
         image: grafana/alloy:v1.12.1
+        restart: unless-stopped
         environment:
             OBSERVABILITY_BASIC_AUTH_PASSWORD: ${OBSERVABILITY_BASIC_AUTH_PASSWORD}
             OBSERVABILITY_BASIC_AUTH_USERNAME: ${OBSERVABILITY_BASIC_AUTH_USERNAME}
